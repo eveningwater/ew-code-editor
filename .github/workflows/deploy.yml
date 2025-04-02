@@ -1,37 +1,39 @@
-name: Deploy Vite Project to GitHub Pages
+name: Deploy ew-code-editor to GitHub Pages
 
 on:
   push:
     branches:
-      - main  # 你可以根据需要修改为自己的主分支名称（比如 master）
+      - main # 你可以根据需要修改为自己的主分支名称（比如 master）
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the code
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # Set up Node.js
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'  # 使用你项目中使用的 Node.js 版本
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # 使用你项目中使用的 Node.js 版本
 
-    # Install dependencies
-    - name: Install dependencies
-      run: npm install pnpm -g
-      run: pnpm install
+      # Install dependencies
+      - name: Install pnpm
+        run: npm install pnpm -g
 
-    # Build the project
-    - name: Build the project
-      run: pnpm run build
+      - name: Install dependencies
+        run: pnpm install
 
-    # Deploy to GitHub Pages
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}  # GitHub 会自动提供这个 token
-        publish_dir: ./dist  # Vite 默认的构建输出目录
+      # Build the project
+      - name: Build the project
+        run: pnpm run build
+
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub 会自动提供这个 token
+          publish_dir: ./dist # Vite 默认的构建输出目录
