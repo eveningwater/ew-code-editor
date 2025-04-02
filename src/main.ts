@@ -178,6 +178,8 @@ function runCode() {
 
   if (iframeDoc) {
     iframeDoc.open();
+    // 写入之前先清理之前写的文档
+    iframeDoc.write("");
     iframeDoc.write(combinedCode);
     iframeDoc.close();
   }
