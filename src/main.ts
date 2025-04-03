@@ -177,6 +177,7 @@ function runCode() {
   const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
   if (iframeDoc) {
     // 重新加载 iframe 内容，彻底清理所有的变量
+    // 解决不释放iframe内容，导致报错Identifier 'xxx' has already been declared
     iframe.contentWindow!.location.reload();
     iframeDoc.open();
     iframeDoc.write(combinedCode);
