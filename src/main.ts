@@ -169,21 +169,12 @@ function runCode() {
   const htmlCode = htmlEditor.getValue();
   const cssCode = cssEditor.getValue();
   const jsCode = jsEditor.getValue();
-
   // 合并代码
   const combinedCode = generateCombinedCode(htmlCode, cssCode, jsCode);
-
   const iframe = $<HTMLIFrameElement>("#preview-frame");
-  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-  // 重新加载 iframe 内容，彻底清理所有的变量
   // 解决不释放iframe内容，导致报错Identifier 'xxx' has already been declared
-  iframe.contentWindow!.location.reload();
-  iframe.src = "about:blank"; // 重置 iframe 内容
-  if (iframeDoc) {
-    iframeDoc.open();
-    iframeDoc.write(combinedCode);
-    iframeDoc.close();
-  }
+  iframe.srcdoc = "about:blank"; // 重置 iframe 内容
+  iframe.srcdoc = combinedCode;
 }
 
 // 设置选项卡切换
