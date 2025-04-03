@@ -175,11 +175,10 @@ function runCode() {
 
   const iframe = $<HTMLIFrameElement>("#preview-frame");
   const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-
   if (iframeDoc) {
+    // 重新加载 iframe 内容，彻底清理所有的变量
+    iframe.contentWindow!.location.reload();
     iframeDoc.open();
-    // 写入之前先清理之前写的文档
-    iframeDoc.write("");
     iframeDoc.write(combinedCode);
     iframeDoc.close();
   }
