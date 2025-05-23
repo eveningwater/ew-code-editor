@@ -11,6 +11,7 @@ import {
   defaultJsCode,
 } from "../const";
 import { $ } from "../utils";
+import loader from "@monaco-editor/loader";
 
 // 编辑器实例
 let htmlEditor: monaco.editor.IStandaloneCodeEditor;
@@ -21,9 +22,10 @@ let jsEditor: monaco.editor.IStandaloneCodeEditor;
  * 创建编辑器实例
  * @param theme 当前主题
  */
-export function createEditors(theme: string) {
+export async function createEditors(theme: string) {
+  const instance = await loader.init();
   // 创建HTML编辑器
-  htmlEditor = monaco.editor.create($("#html-editor")!, {
+  htmlEditor = instance.editor.create($("#html-editor")!, {
     value: defaultHtmlCode,
     language: "html",
     theme,
@@ -31,7 +33,7 @@ export function createEditors(theme: string) {
   });
 
   // 创建CSS编辑器
-  cssEditor = monaco.editor.create($("#css-editor")!, {
+  cssEditor = instance.editor.create($("#css-editor")!, {
     value: defaultCssCode,
     language: "css",
     theme,
@@ -39,7 +41,7 @@ export function createEditors(theme: string) {
   });
 
   // 创建JavaScript编辑器
-  jsEditor = monaco.editor.create($("#js-editor")!, {
+  jsEditor = instance.editor.create($("#js-editor")!, {
     value: defaultJsCode,
     language: "javascript",
     theme,
