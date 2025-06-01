@@ -15,7 +15,7 @@ export interface EditorConfig {
 const defaultConfig: EditorConfig = {
   theme: "vs-dark",
   layout: "horizontal",
-  language: "en",
+  language: "zh",
 };
 
 // 当前配置

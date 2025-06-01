@@ -13,11 +13,17 @@ import {
 import { $ } from "../utils";
 import loader from "@monaco-editor/loader";
 
+// 配置 Monaco 编辑器的 CDN 路径
+loader.config({
+  paths: {
+    vs: "https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.52.2/min/vs",
+  },
+});
+
 // 编辑器实例
 let htmlEditor: monaco.editor.IStandaloneCodeEditor;
 let cssEditor: monaco.editor.IStandaloneCodeEditor;
 let jsEditor: monaco.editor.IStandaloneCodeEditor;
-
 /**
  * 创建编辑器实例
  * @param theme 当前主题
