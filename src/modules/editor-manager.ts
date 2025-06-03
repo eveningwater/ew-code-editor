@@ -29,11 +29,9 @@ let jsEditor: monaco.editor.IStandaloneCodeEditor;
  * @param theme 当前主题
  */
 export async function createEditors(theme: string) {
+  const { showLoading, hideLoading } = await import("../utils");
   // 显示所有编辑器的加载效果
-  import("../utils").then(({ showLoading }) => {
-    showLoading("global");
-  });
-
+  showLoading("global");
   try {
     const instance = await loader.init();
     // 创建HTML编辑器
@@ -63,9 +61,7 @@ export async function createEditors(theme: string) {
     return { htmlEditor, cssEditor, jsEditor };
   } finally {
     // 无论成功还是失败，都隐藏加载效果
-    import("../utils").then(({ hideLoading }) => {
-      hideLoading("global");
-    });
+    hideLoading("global");
   }
 }
 

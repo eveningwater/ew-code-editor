@@ -91,13 +91,15 @@ export function setupEventListeners() {
   });
 
   // 接收外部消息
-  window.addEventListener("message", function (event) {
-    import("../utils").then(({ showLoading }) => {
-      showLoading();
-    });
+  window.addEventListener("message", async function (event) {
+    const { showLoading, hideLoading } = await import("../utils");
+    showLoading();
     if (Array.isArray(event.data)) {
       handleExternalMessage(event.data);
     }
+    setTimeout(() => {
+      hideLoading();
+    }, 3000);
   });
 }
 
@@ -108,22 +110,9 @@ export function setupEventListeners() {
 function handleExternalMessage(data: Record<string, string>[]) {
   // 这里可以添加消息处理逻辑
   // 目前只是简单地将消息传递给编辑器
-  import("./editor-manager")
-    .then(({ setEditorsContent }) => {
-      setEditorsContent(data);
-      runCode();
-      formatEditorsCode().finally(() => {
-        // 格式化完成后隐藏加载效果
-        import("../utils").then(({ hideLoading }) => {
-          hideLoading();
-        });
-      });
-    })
-    .catch((error) => {
-      console.error("Error handling external message:", error);
-      // 发生错误时也要隐藏加载效果
-      import("../utils").then(({ hideLoading }) => {
-        hideLoading();
-      });
-    });
+  import("./editor-manager").then(({ setEditorsContent }) => {
+    setEditorsContent(data);
+    runCode();
+    formatEditorsCode();
+  });
 }
