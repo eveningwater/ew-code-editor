@@ -46,5 +46,8 @@ export const pageTemplate = ` <div class="container">
       <div id="preview-container" class="panel">
         <iframe id="preview-frame"></iframe>
       </div>
+      <div id="global-loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
     </main>
   </div>`;

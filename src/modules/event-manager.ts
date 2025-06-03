@@ -103,11 +103,29 @@ export function setupEventListeners() {
  * @param data 消息数据
  */
 function handleExternalMessage(data: Record<string, string>[]) {
+  // 显示加载效果
+  import("../utils").then(({ showLoading }) => {
+    showLoading("global");
+  });
+
   // 这里可以添加消息处理逻辑
   // 目前只是简单地将消息传递给编辑器
-  import("./editor-manager").then(({ setEditorsContent }) => {
-    setEditorsContent(data);
-    runCode();
-    formatEditorsCode();
-  });
+  import("./editor-manager")
+    .then(({ setEditorsContent }) => {
+      setEditorsContent(data);
+      runCode();
+      formatEditorsCode().finally(() => {
+        // 格式化完成后隐藏加载效果
+        import("../utils").then(({ hideLoading }) => {
+          hideLoading("global");
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("Error handling external message:", error);
+      // 发生错误时也要隐藏加载效果
+      import("../utils").then(({ hideLoading }) => {
+        hideLoading("global");
+      });
+    });
 }

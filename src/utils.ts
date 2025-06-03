@@ -62,3 +62,29 @@ export const openNewWindow = (url: string) => {
   a.click();
   document.body.removeChild(a);
 };
+
+/**
+ * 显示加载效果
+ * @param elementId 元素ID，如果不提供则显示所有编辑器的加载效果
+ */
+export const showLoading = (elementId?: string) => {
+  if (elementId) {
+    const loadingElement = $(`#${elementId}-loading`);
+    if (loadingElement) {
+      loadingElement.classList.add("active");
+    }
+  }
+};
+
+/**
+ * 隐藏加载效果
+ * @param elementId 元素ID，如果不提供则隐藏所有编辑器的加载效果
+ */
+export const hideLoading = (elementId?: string) => {
+  if (elementId) {
+    const loadingElement = $(`#${elementId}-loading`);
+    if (loadingElement) {
+      loadingElement.classList.remove("active");
+    }
+  }
+};

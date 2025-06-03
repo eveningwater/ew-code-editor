@@ -29,32 +29,44 @@ let jsEditor: monaco.editor.IStandaloneCodeEditor;
  * @param theme 当前主题
  */
 export async function createEditors(theme: string) {
-  const instance = await loader.init();
-  // 创建HTML编辑器
-  htmlEditor = instance.editor.create($("#html-editor")!, {
-    value: defaultHtmlCode,
-    language: "html",
-    theme,
-    ...baseEditorOptions,
+  // 显示所有编辑器的加载效果
+  import("../utils").then(({ showLoading }) => {
+    showLoading("global");
   });
 
-  // 创建CSS编辑器
-  cssEditor = instance.editor.create($("#css-editor")!, {
-    value: defaultCssCode,
-    language: "css",
-    theme,
-    ...baseEditorOptions,
-  });
+  try {
+    const instance = await loader.init();
+    // 创建HTML编辑器
+    htmlEditor = instance.editor.create($("#html-editor")!, {
+      value: defaultHtmlCode,
+      language: "html",
+      theme,
+      ...baseEditorOptions,
+    });
 
-  // 创建JavaScript编辑器
-  jsEditor = instance.editor.create($("#js-editor")!, {
-    value: defaultJsCode,
-    language: "javascript",
-    theme,
-    ...baseEditorOptions,
-  });
+    // 创建CSS编辑器
+    cssEditor = instance.editor.create($("#css-editor")!, {
+      value: defaultCssCode,
+      language: "css",
+      theme,
+      ...baseEditorOptions,
+    });
 
-  return { htmlEditor, cssEditor, jsEditor };
+    // 创建JavaScript编辑器
+    jsEditor = instance.editor.create($("#js-editor")!, {
+      value: defaultJsCode,
+      language: "javascript",
+      theme,
+      ...baseEditorOptions,
+    });
+
+    return { htmlEditor, cssEditor, jsEditor };
+  } finally {
+    // 无论成功还是失败，都隐藏加载效果
+    import("../utils").then(({ hideLoading }) => {
+      hideLoading("global");
+    });
+  }
 }
 
 /**
