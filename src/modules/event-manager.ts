@@ -3,7 +3,11 @@
  */
 import { $, $$ } from "../utils";
 import { runCode, downloadCode, openInNewWindow } from "./preview-manager";
-import { formatEditorsCode, notifyEditorLayoutChange } from "./editor-manager";
+import {
+  formatEditorsCode,
+  notifyEditorLayoutChange,
+  getEditorsCode,
+} from "./editor-manager";
 import { initLayout } from "./layout-manager";
 import {
   closeAllDropdowns,
@@ -18,6 +22,7 @@ import {
   updateLayout,
   updateTheme,
 } from "./config-manager";
+import { defaultCssCode, defaultHtmlCode, defaultJsCode } from "../const";
 
 /**
  * 设置所有事件监听器
@@ -93,13 +98,13 @@ export function setupEventListeners() {
   // 接收外部消息
   window.addEventListener("message", async function (event) {
     const { showLoading, hideLoading } = await import("../utils");
-    showLoading();
     if (Array.isArray(event.data)) {
+      showLoading();
       handleExternalMessage(event.data);
+      setTimeout(() => {
+        hideLoading();
+      }, 2000);
     }
-    setTimeout(() => {
-      hideLoading();
-    }, 3000);
   });
 }
 
