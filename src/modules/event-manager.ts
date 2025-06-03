@@ -3,11 +3,7 @@
  */
 import { $, $$ } from "../utils";
 import { runCode, downloadCode, openInNewWindow } from "./preview-manager";
-import {
-  formatEditorsCode,
-  notifyEditorLayoutChange,
-  getEditorsCode,
-} from "./editor-manager";
+import { formatEditorsCode, notifyEditorLayoutChange } from "./editor-manager";
 import { initLayout } from "./layout-manager";
 import {
   closeAllDropdowns,
@@ -22,7 +18,6 @@ import {
   updateLayout,
   updateTheme,
 } from "./config-manager";
-import { defaultCssCode, defaultHtmlCode, defaultJsCode } from "../const";
 
 /**
  * 设置所有事件监听器
