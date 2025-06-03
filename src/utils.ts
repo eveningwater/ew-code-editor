@@ -73,6 +73,13 @@ export const showLoading = (elementId?: string) => {
     if (loadingElement) {
       loadingElement.classList.add("active");
     }
+  } else {
+    ["html", "css", "js"].forEach((id) => {
+      const loadingElement = $(`#${id}-loading`);
+      if (loadingElement) {
+        loadingElement.classList.add("active");
+      }
+    });
   }
 };
 
@@ -86,5 +93,12 @@ export const hideLoading = (elementId?: string) => {
     if (loadingElement) {
       loadingElement.classList.remove("active");
     }
+  } else {
+    ["html", "css", "js"].forEach((id) => {
+      const loadingElement = $(`#${id}-loading`);
+      if (loadingElement) {
+        loadingElement.classList.remove("active");
+      }
+    });
   }
 };

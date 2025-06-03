@@ -39,9 +39,21 @@ export const pageTemplate = ` <div class="container">
           <button id="css-tab" class="tab-btn" data-tab="css">CSS</button>
           <button id="js-tab" class="tab-btn" data-tab="js">JavaScript</button>
         </div>
-        <div id="html-editor" class="editor-pane active"></div>
-        <div id="css-editor" class="editor-pane"></div>
-        <div id="js-editor" class="editor-pane"></div>
+        <div id="html-editor" class="editor-pane active">
+          <div id="html-loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        <div id="css-editor" class="editor-pane">
+          <div id="css-loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        <div id="js-editor" class="editor-pane">
+          <div id="js-loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
       </div>
       <div id="preview-container" class="panel">
         <iframe id="preview-frame"></iframe>

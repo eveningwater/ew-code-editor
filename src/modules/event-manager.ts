@@ -92,6 +92,9 @@ export function setupEventListeners() {
 
   // 接收外部消息
   window.addEventListener("message", function (event) {
+    import("../utils").then(({ showLoading }) => {
+      showLoading();
+    });
     if (Array.isArray(event.data)) {
       handleExternalMessage(event.data);
     }
@@ -103,11 +106,6 @@ export function setupEventListeners() {
  * @param data 消息数据
  */
 function handleExternalMessage(data: Record<string, string>[]) {
-  // 显示加载效果
-  import("../utils").then(({ showLoading }) => {
-    showLoading("global");
-  });
-
   // 这里可以添加消息处理逻辑
   // 目前只是简单地将消息传递给编辑器
   import("./editor-manager")
@@ -117,7 +115,7 @@ function handleExternalMessage(data: Record<string, string>[]) {
       formatEditorsCode().finally(() => {
         // 格式化完成后隐藏加载效果
         import("../utils").then(({ hideLoading }) => {
-          hideLoading("global");
+          hideLoading();
         });
       });
     })
@@ -125,7 +123,7 @@ function handleExternalMessage(data: Record<string, string>[]) {
       console.error("Error handling external message:", error);
       // 发生错误时也要隐藏加载效果
       import("../utils").then(({ hideLoading }) => {
-        hideLoading("global");
+        hideLoading();
       });
     });
 }
