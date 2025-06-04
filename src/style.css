@@ -342,3 +342,106 @@ body[data-theme="hc-black"] .loading-overlay {
     justify-content: flex-start;
   }
 }
+
+/* 依赖管理面板样式 */
+.dependency-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  display: none;
+  height: 200px;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+body[data-theme="vs-dark"] .dependency-panel,
+body[data-theme="hc-black"] .dependency-panel {
+  background-color: #252526;
+  border-top-color: #333;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.dependency-panel.show {
+  display: flex;
+}
+
+.dependency-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+body[data-theme="vs-dark"] .dependency-header,
+body[data-theme="hc-black"] .dependency-header {
+  border-bottom-color: #333;
+}
+
+.dependency-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.dependency-content {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#dependency-input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+body[data-theme="vs-dark"] #dependency-input,
+body[data-theme="hc-black"] #dependency-input {
+  background-color: #333;
+  color: #eee;
+  border-color: #555;
+}
+
+#dependency-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dependency-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+body[data-theme="vs-dark"] .dependency-item,
+body[data-theme="hc-black"] .dependency-item {
+  background-color: #333;
+}
+
+.dependency-item .remove-btn {
+  cursor: pointer;
+  color: #ff5252;
+  font-weight: bold;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .dependency-panel {
+    height: 250px;
+  }
+}

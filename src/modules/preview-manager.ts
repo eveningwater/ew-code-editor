@@ -1,11 +1,13 @@
 import { generateCombinedCode, openNewWindow, $ } from "../utils";
 import { getEditorsCode } from "./editor-manager";
+import { getCurrentFramework } from "./framework-manager";
 
 /**
  * 运行代码
  */
 export function runCode() {
   const { html, css, js } = getEditorsCode();
+  const currentFramework = getCurrentFramework();
 
   // 合并代码
   const combinedCode = generateCombinedCode(html, css, js);
@@ -21,6 +23,7 @@ export function runCode() {
  */
 export function downloadCode() {
   const { html, css, js } = getEditorsCode();
+  const currentFramework = getCurrentFramework();
 
   // 合并代码
   const combinedCode = generateCombinedCode(html, css, js);
@@ -31,7 +34,7 @@ export function downloadCode() {
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "code-editor-export.html";
+  a.download = `code-editor-export-${currentFramework}.html`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

@@ -6,6 +6,15 @@ export const pageTemplate = ` <div class="container">
         <button id="format-btn" class="btn">Format</button>
         <button id="download-btn" class="btn">Download</button>
         <button id="new-window-btn" class="btn">New Window</button>
+        <button id="add-dependency-btn" class="btn">Dependencies</button>
+        <div class="dropdown" id="framework-dropdown">
+          <button class="btn dropdown-toggle">Framework</button>
+          <div class="dropdown-menu">
+            <a href="#" data-framework="vanilla">Vanilla</a>
+            <a href="#" data-framework="react">React</a>
+            <a href="#" data-framework="vue">Vue</a>
+          </div>
+        </div>
         <div class="dropdown" id="theme-dropdown">
           <button class="btn dropdown-toggle">Theme</button>
           <div class="dropdown-menu">
@@ -57,6 +66,20 @@ export const pageTemplate = ` <div class="container">
       </div>
       <div id="preview-container" class="panel">
         <iframe id="preview-frame"></iframe>
+        <div id="dependency-manager" class="dependency-panel">
+          <div class="dependency-header">
+            <h3>Dependencies</h3>
+            <button id="install-btn" class="btn">Install</button>
+            <button id="close-dependency-btn" class="btn">Close</button>
+          </div>
+          <div class="dependency-content">
+            <input type="text" id="dependency-input" placeholder="Package name (e.g. react@18.2.0)" />
+            <div id="dependency-list"></div>
+          </div>
+          <div id="dependency-loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
       </div>
       <div id="global-loading" class="loading-overlay">
         <div class="loading-spinner"></div>

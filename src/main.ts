@@ -8,6 +8,7 @@ import { setupEventListeners } from "./modules/event-manager";
 import { updateUILanguage } from "./modules/ui-manager";
 import { getConfig } from "./modules/config-manager";
 import { runCode } from "./modules/preview-manager";
+import { updateFramework } from "./modules/framework-manager";
 
 /**
  * 初始化应用
@@ -34,6 +35,9 @@ async function init() {
 
   // 设置初始主题
   document.body.setAttribute("data-theme", config.theme);
+
+  // 设置初始框架
+  updateFramework("vanilla");
 
   // 运行初始代码
   runCode();

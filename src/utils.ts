@@ -1,3 +1,9 @@
+import {
+  getFrameworkCDNs,
+  getDependencyCDNs,
+  getCurrentFramework,
+} from "./modules/framework-manager";
+
 export const generateCombinedCode = (html: string, css: string, js: string) => {
   // 解析HTML以找到插入点
   const parser = new DOMParser();
@@ -15,6 +21,34 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     }
   }
 
+  // 获取当前框架
+  const currentFramework = getCurrentFramework();
+
+  // 添加框架CDN
+  const frameworkCDNs = getFrameworkCDNs();
+  frameworkCDNs.forEach((cdn) => {
+    const scriptElement = doc.createElement("script");
+    scriptElement.src = cdn;
+    doc.head.appendChild(scriptElement);
+  });
+
+  // 添加用户安装的依赖CDN
+  const dependencyCDNs = getDependencyCDNs();
+  dependencyCDNs.forEach((cdn) => {
+    if (cdn.endsWith(".css")) {
+      // 对于CSS文件，使用link标签
+      const linkElement = doc.createElement("link");
+      linkElement.rel = "stylesheet";
+      linkElement.href = cdn;
+      doc.head.appendChild(linkElement);
+    } else {
+      // 对于JS文件，使用script标签
+      const scriptElement = doc.createElement("script");
+      scriptElement.src = cdn;
+      doc.head.appendChild(scriptElement);
+    }
+  });
+
   // 添加CSS
   if (css.trim()) {
     const styleElement = doc.createElement("style");
@@ -22,9 +56,40 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     doc.head.appendChild(styleElement);
   }
 
+  // 为React和其他需要CommonJS模块系统的库添加模拟的require函数
+  if (currentFramework === "react" || dependencyCDNs.length > 0) {
+    const requireScript = doc.createElement("script");
+    requireScript.textContent = `
+      // 模拟CommonJS的require函数
+      window.require = function(module) {
+        // 简单的模块映射
+        const modules = {
+          'react': window.React,
+          'react-dom': window.ReactDOM,
+          'antd': window.antd
+        };
+        
+        // 返回请求的模块
+        if (modules[module]) {
+          return modules[module];
+        } else {
+          console.warn('Module not found:', module);
+          return {};
+        }
+      };
+    `;
+    doc.head.appendChild(requireScript);
+  }
+
   // 添加JavaScript
   if (js.trim()) {
     const scriptElement = doc.createElement("script");
+
+    // 对于React，需要使用Babel转换JSX
+    if (currentFramework === "react") {
+      scriptElement.type = "text/babel";
+    }
+
     scriptElement.textContent = js;
     doc.body.appendChild(scriptElement);
   }

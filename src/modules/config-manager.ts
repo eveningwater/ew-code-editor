@@ -3,12 +3,14 @@
  */
 
 import { updateEditorsTheme } from "./editor-manager";
+import { updateFramework } from "./framework-manager";
 
 // 配置类型
 export interface EditorConfig {
   theme: string;
   layout: string;
   language: string;
+  framework: string;
 }
 
 // 默认配置
@@ -16,12 +18,14 @@ const defaultConfig: EditorConfig = {
   theme: "vs-dark",
   layout: "horizontal",
   language: "zh",
+  framework: "vanilla",
 };
 
 // 当前配置
 let currentConfig: EditorConfig = {
   ...defaultConfig,
   language: localStorage.getItem("editor-language") || defaultConfig.language,
+  framework: localStorage.getItem("editor-framework") || defaultConfig.framework,
 };
 
 /**
@@ -51,9 +55,19 @@ export function updateLayout(layout: string) {
 
 /**
  * 更新语言配置
- * @param language 语言代码
+ * @param language 语言
  */
 export function updateLanguage(language: string) {
   currentConfig.language = language;
   localStorage.setItem("editor-language", language);
+}
+
+/**
+ * 更新框架配置
+ * @param framework 框架名称
+ */
+export function updateFrameworkConfig(framework: string) {
+  currentConfig.framework = framework;
+  localStorage.setItem("editor-framework", framework);
+  updateFramework(framework);
 }

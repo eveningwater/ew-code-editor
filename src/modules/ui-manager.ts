@@ -16,9 +16,16 @@ export function updateUILanguage(language: string) {
   $("#new-window-btn")!.textContent = t.newWindow;
 
   // 更新下拉菜单标题
+  $("#framework-dropdown .dropdown-toggle")!.textContent = t.framework;
   $("#theme-dropdown .dropdown-toggle")!.textContent = t.theme;
   $("#layout-dropdown .dropdown-toggle")!.textContent = t.layout;
   $("#language-dropdown .dropdown-toggle")!.textContent = t.language;
+
+  // 更新框架选项
+  const frameworkItems = $$("#framework-dropdown .dropdown-menu a");
+  frameworkItems[0].textContent = t.vanilla;
+  frameworkItems[1].textContent = t.react;
+  frameworkItems[2].textContent = t.vue;
 
   // 更新主题选项
   const themeItems = $$("#theme-dropdown .dropdown-menu a");
@@ -37,6 +44,12 @@ export function updateUILanguage(language: string) {
   const langItems = $$("#language-dropdown .dropdown-menu a");
   langItems[0].textContent = t.english;
   langItems[1].textContent = t.chinese;
+
+  // 更新依赖管理面板
+  $("#dependency-manager .dependency-header h3")!.textContent = t.dependencies;
+  $("#install-btn")!.textContent = t.install;
+  $("#close-dependency-btn")!.textContent = t.close;
+  $("#add-dependency-btn")!.textContent = t.dependencies;
 }
 
 /**

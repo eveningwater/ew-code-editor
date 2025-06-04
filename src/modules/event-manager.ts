@@ -17,7 +17,12 @@ import {
   updateLanguage,
   updateLayout,
   updateTheme,
+  updateFrameworkConfig,
 } from "./config-manager";
+import {
+  setupFrameworkEvents,
+  showDependencyManager,
+} from "./framework-manager";
 
 /**
  * 设置所有事件监听器
@@ -34,6 +39,9 @@ export function setupEventListeners() {
   // 设置预览框事件监听
   setupPreviewFrameListeners();
 
+  // 设置框架相关事件
+  setupFrameworkEvents();
+
   // 运行按钮
   $("#run-btn")?.addEventListener("click", runCode);
 
@@ -45,6 +53,9 @@ export function setupEventListeners() {
 
   // 新窗口预览按钮
   $("#new-window-btn")?.addEventListener("click", openInNewWindow);
+
+  // 添加依赖按钮 - 显示依赖管理面板
+  $("#add-dependency-btn")?.addEventListener("click", showDependencyManager);
 
   // 主题切换
   $$("a[data-theme]").forEach((item) => {
@@ -84,6 +95,21 @@ export function setupEventListeners() {
       if (lang && lang !== config.language) {
         updateLanguage(lang);
         updateUILanguage(lang);
+      }
+      // 关闭下拉菜单
+      closeAllDropdowns();
+    });
+  });
+
+  // 框架切换
+  $$("a[data-framework]").forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      const framework = (e.currentTarget as HTMLElement).getAttribute(
+        "data-framework"
+      );
+      if (framework) {
+        updateFrameworkConfig(framework);
       }
       // 关闭下拉菜单
       closeAllDropdowns();
