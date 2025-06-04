@@ -25,7 +25,8 @@ const defaultConfig: EditorConfig = {
 let currentConfig: EditorConfig = {
   ...defaultConfig,
   language: localStorage.getItem("editor-language") || defaultConfig.language,
-  framework: localStorage.getItem("editor-framework") || defaultConfig.framework,
+  framework:
+    localStorage.getItem("editor-framework") || defaultConfig.framework,
 };
 
 /**

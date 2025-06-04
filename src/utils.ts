@@ -86,11 +86,61 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     const scriptElement = doc.createElement("script");
 
     // 对于React，需要使用Babel转换JSX
-    if (currentFramework === "react") {
+    if (currentFramework === "react" || currentFramework === "react-ts") {
       scriptElement.type = "text/babel";
     }
 
-    scriptElement.textContent = js;
+    // 对于TypeScript相关框架，添加type="text/typescript"属性
+    if (currentFramework.includes("ts") || currentFramework === "typescript") {
+      // 添加TypeScript编译选项
+      const tsConfigScript = doc.createElement("script");
+      tsConfigScript.textContent = `
+        // TypeScript编译选项
+        window.ts = window.ts || {};
+        window.ts.transpileModule = window.ts.transpileModule || function(code) { return { outputText: code }; };
+        
+        // 设置TypeScript编译选项
+        var tsConfig = {
+          compilerOptions: {
+            target: "es2015",
+            module: "esnext",
+            jsx: "react",
+            jsxFactory: "React.createElement",
+            jsxFragmentFactory: "React.Fragment",
+            strict: true,
+            esModuleInterop: true
+          }
+        };
+      `;
+      doc.head.appendChild(tsConfigScript);
+
+      // 包装TypeScript代码，使其在运行前先编译
+      const originalCode = js;
+      if (currentFramework === "react-ts") {
+        // 对于React TypeScript，使用Babel处理JSX，同时处理TypeScript
+        scriptElement.type = "text/babel";
+        scriptElement.setAttribute("data-type", "module");
+        scriptElement.setAttribute("data-presets", "typescript,react");
+      } else {
+        // 对于其他TypeScript框架，使用TypeScript编译器
+        const wrappedCode = `
+          // 编译并执行TypeScript代码
+          (function() {
+            try {
+              var tsResult = ts.transpileModule(${JSON.stringify(originalCode)}, tsConfig);
+              eval(tsResult.outputText);
+            } catch (error) {
+              console.error('TypeScript编译错误:', error);
+            }
+          })();
+        `;
+        scriptElement.textContent = wrappedCode;
+      }
+    } else {
+      // 非TypeScript框架，直接使用原始代码
+      scriptElement.textContent = js;
+    }
+
     doc.body.appendChild(scriptElement);
   }
 

@@ -24,8 +24,6 @@ export function updateUILanguage(language: string) {
   // 更新框架选项
   const frameworkItems = $$("#framework-dropdown .dropdown-menu a");
   frameworkItems[0].textContent = t.vanilla;
-  frameworkItems[1].textContent = t.react;
-  frameworkItems[2].textContent = t.vue;
 
   // 更新主题选项
   const themeItems = $$("#theme-dropdown .dropdown-menu a");

@@ -56,26 +56,32 @@ export const translations: Record<string, Record<string, string>> = {
 // 默认代码模板
 export const defaultTemplates = {
   vanilla: {
-    html: `
-    <div class="container">
-      <h1>Hello, CodeEditor!</h1>
-      <p>Edit this code and click Run to see changes</p>
-      <button id="demo-btn">Click Me</button>
-    </div>
-  `,
+    html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanilla JS Demo</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Hello, Vanilla JS!</h1>
+    <p>This is a simple Vanilla JavaScript example.</p>
+    <button id="demo-btn">Click Me</button>
+  </div>
+</body>
+</html>`,
     css: `body {
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
+    padding: 20px;
     background-color: #f0f0f0;
   }
   
   .container {
-    text-align: center;
-    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -102,6 +108,81 @@ export const defaultTemplates = {
     js: `document.getElementById('demo-btn').addEventListener('click', function() {
     alert('Button clicked!');
   });`,
+  },
+  typescript: {
+    html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeScript Demo</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Hello, TypeScript!</h1>
+    <p>This is a simple TypeScript example.</p>
+    <button id="demo-btn">Click Me</button>
+  </div>
+</body>
+</html>`,
+    css: `body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  button {
+    background-color: #007acc;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #005a9c;
+  }`,
+    js: `// TypeScript code
+interface Person {
+  name: string;
+  age: number;
+}
+
+class Greeter {
+  greeting: string;
+
+  constructor(message: string) {
+    this.greeting = message;
+  }
+
+  greet(person: Person): string {
+    return \`Hello, \${person.name}! You are \${person.age} years old. \${this.greeting}\`;
+  }
+}
+
+const greeter = new Greeter("Welcome to TypeScript!");
+const user: Person = { name: "User", age: 25 };
+
+document.getElementById('demo-btn')?.addEventListener('click', function() {
+  alert(greeter.greet(user));
+});`,
   },
   react: {
     html: `
@@ -148,6 +229,74 @@ function App() {
   return (
     <div className="app">
       <h1>React App</h1>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+
+// Render the App component to the DOM
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+);`,
+  },
+  "react-ts": {
+    html: `
+    <div id="root"></div>
+  `,
+    css: `body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  button {
+    background-color: #61dafb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #21a8f3;
+  }`,
+    js: `// React with TypeScript
+import React from 'react';
+import ReactDOM from 'react-dom';
+interface AppProps {}
+
+interface AppState {
+  count: number;
+}
+
+// React component with TypeScript
+function App(): React.ReactElement {
+  const [count, setCount] = React.useState<number>(0);
+
+  return (
+    <div className="app">
+      <h1>React TypeScript App</h1>
       <p>You clicked {count} times</p>
       <button onClick={() => setCount(count + 1)}>
         Click me
@@ -215,6 +364,205 @@ new Vue({
   \`
 });`,
   },
+  vue3: {
+    html: `
+    <div id="app"></div>
+  `,
+    css: `body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .vue-app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  button {
+    background-color: #42b883;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #36a070;
+  }`,
+    js: `// Vue 3 application
+const { createApp, ref } = Vue;
+
+const App = {
+  setup() {
+    const count = ref(0);
+    
+    return {
+      count
+    };
+  },
+  template: \`
+    <div class="vue-app">
+      <h1>Vue 3 App</h1>
+      <p>You clicked {{ count }} times</p>
+      <button @click="count++">Click me</button>
+    </div>
+  \`
+};
+
+createApp(App).mount('#app');`,
+  },
+  "vue-ts": {
+    html: `
+    <div id="app"></div>
+  `,
+    css: `body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .vue-app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  button {
+    background-color: #42b883;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #36a070;
+  }`,
+    js: `// Vue 2 with TypeScript
+interface AppData {
+  count: number;
+}
+
+// Vue application with TypeScript
+new Vue({
+  el: '#app',
+  data(): AppData {
+    return {
+      count: 0
+    };
+  },
+  methods: {
+    increment(): void {
+      this.count++;
+    }
+  },
+  template: \`
+    <div class="vue-app">
+      <h1>Vue 2 TypeScript App</h1>
+      <p>You clicked {{ count }} times</p>
+      <button @click="increment">Click me</button>
+    </div>
+  \`
+});`,
+  },
+  "vue3-ts": {
+    html: `
+    <div id="app"></div>
+  `,
+    css: `body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .vue-app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  button {
+    background-color: #42b883;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #36a070;
+  }`,
+    js: `// Vue 3 with TypeScript
+const { createApp, ref, defineComponent } = Vue;
+
+interface User {
+  name: string;
+  age: number;
+}
+
+// Vue 3 application with TypeScript
+const App = defineComponent({
+  setup() {
+    const count = ref<number>(0);
+    const user = ref<User>({ name: 'User', age: 25 });
+    
+    const increment = (): void => {
+      count.value++;
+    };
+    
+    return {
+      count,
+      user,
+      increment
+    };
+  },
+  template: \`
+    <div class="vue-app">
+      <h1>Vue 3 TypeScript App</h1>
+      <p>Hello, {{ user.name }}!</p>
+      <p>You clicked {{ count }} times</p>
+      <button @click="increment">Click me</button>
+    </div>
+  \`
+});
+
+createApp(App).mount('#app');`,
+  },
 };
 
 // 默认代码 - 使用vanilla模板
@@ -229,7 +577,23 @@ export const frameworkCDNs = {
     "https://unpkg.com/react-dom@18/umd/react-dom.development.js",
     "https://unpkg.com/@babel/standalone/babel.min.js",
   ],
+  "react-ts": [
+    "https://unpkg.com/react@18/umd/react.development.js",
+    "https://unpkg.com/react-dom@18/umd/react-dom.development.js",
+    "https://unpkg.com/@babel/standalone/babel.min.js",
+    "https://unpkg.com/typescript@latest/lib/typescript.js",
+  ],
   vue: ["https://unpkg.com/vue@2.6.14/dist/vue.js"],
+  vue3: ["https://unpkg.com/vue@3.3.4/dist/vue.global.js"],
+  "vue-ts": [
+    "https://unpkg.com/vue@2.6.14/dist/vue.js",
+    "https://unpkg.com/typescript@latest/lib/typescript.js",
+  ],
+  "vue3-ts": [
+    "https://unpkg.com/vue@3.3.4/dist/vue.global.js",
+    "https://unpkg.com/typescript@latest/lib/typescript.js",
+  ],
+  typescript: ["https://unpkg.com/typescript@latest/lib/typescript.js"],
   vanilla: [],
 };
 

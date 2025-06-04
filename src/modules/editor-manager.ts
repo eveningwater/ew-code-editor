@@ -10,8 +10,9 @@ import {
   defaultHtmlCode,
   defaultJsCode,
 } from "../const";
-import { $ } from "../utils";
+import { $, $$ } from "../utils";
 import loader from "@monaco-editor/loader";
+import { runCode } from "./preview-manager";
 
 // 配置 Monaco 编辑器的 CDN 路径
 loader.config({
@@ -24,6 +25,12 @@ loader.config({
 let htmlEditor: monaco.editor.IStandaloneCodeEditor;
 let cssEditor: monaco.editor.IStandaloneCodeEditor;
 let jsEditor: monaco.editor.IStandaloneCodeEditor;
+let editorInstance: typeof monaco | null = null;
+/**
+ * 获取编辑器实例
+ */ /**
+ * 获取编辑器实例
+ */
 /**
  * 创建编辑器实例
  * @param theme 当前主题
@@ -33,9 +40,9 @@ export async function createEditors(theme: string) {
   // 显示所有编辑器的加载效果
   showLoading("global");
   try {
-    const instance = await loader.init();
+    editorInstance = await loader.init();
     // 创建HTML编辑器
-    htmlEditor = instance.editor.create($("#html-editor")!, {
+    htmlEditor = editorInstance.editor.create($("#html-editor")!, {
       value: defaultHtmlCode,
       language: "html",
       theme,
@@ -43,7 +50,7 @@ export async function createEditors(theme: string) {
     });
 
     // 创建CSS编辑器
-    cssEditor = instance.editor.create($("#css-editor")!, {
+    cssEditor = editorInstance.editor.create($("#css-editor")!, {
       value: defaultCssCode,
       language: "css",
       theme,
@@ -51,7 +58,7 @@ export async function createEditors(theme: string) {
     });
 
     // 创建JavaScript编辑器
-    jsEditor = instance.editor.create($("#js-editor")!, {
+    jsEditor = editorInstance.editor.create($("#js-editor")!, {
       value: defaultJsCode,
       language: "javascript",
       theme,
@@ -186,4 +193,29 @@ export function notifyEditorLayoutChange(activeTab?: string) {
       jsEditor.layout();
     }
   }, 10);
+}
+
+/**
+ * 更新JavaScript编辑器的语言模式
+ * @param framework 当前框架
+ */
+export function updateJsEditorLanguage(framework: string) {
+  // 检查框架是否包含TypeScript
+  const isTypeScript = framework.includes("ts") || framework === "typescript";
+
+  // 更新JavaScript编辑器的语言模式
+  if (jsEditor) {
+    editorInstance?.editor.setModelLanguage(
+      jsEditor.getModel()!,
+      isTypeScript ? "typescript" : "javascript"
+    );
+  }
+
+  const element = [...$$(".tabs .tab-btn")].find(
+    (item) => item.getAttribute("data-tab") === "js"
+  );
+  if (element) {
+    element.textContent = isTypeScript ? "typescript" : "javascript";
+  }
+  runCode();
 }

@@ -11,8 +11,13 @@ export const pageTemplate = ` <div class="container">
           <button class="btn dropdown-toggle">Framework</button>
           <div class="dropdown-menu">
             <a href="#" data-framework="vanilla">Vanilla</a>
+            <a href="#" data-framework="typescript">TypeScript</a>
             <a href="#" data-framework="react">React</a>
-            <a href="#" data-framework="vue">Vue</a>
+            <a href="#" data-framework="react-ts">React TypeScript</a>
+            <a href="#" data-framework="vue">Vue 2</a>
+            <a href="#" data-framework="vue3">Vue 3</a>
+            <a href="#" data-framework="vue-ts">Vue 2 TypeScript</a>
+            <a href="#" data-framework="vue3-ts">Vue 3 TypeScript</a>
           </div>
         </div>
         <div class="dropdown" id="theme-dropdown">

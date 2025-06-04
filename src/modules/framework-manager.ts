@@ -12,8 +12,13 @@ let currentFramework = "vanilla";
 // 已安装的依赖
 let installedDependencies: Record<string, string[]> = {
   vanilla: [],
+  typescript: [],
   react: [],
+  "react-ts": [],
   vue: [],
+  vue3: [],
+  "vue-ts": [],
+  "vue3-ts": [],
 };
 
 /**
@@ -29,10 +34,6 @@ export function getCurrentFramework() {
  */
 export function updateFramework(framework: string) {
   if (framework === currentFramework) return;
-
-  // 保存当前代码
-  const currentCode = getEditorsCode();
-
   // 切换框架
   currentFramework = framework;
 
@@ -45,6 +46,11 @@ export function updateFramework(framework: string) {
       { type: "js", content: template.js },
     ]);
   }
+
+  // 更新JavaScript编辑器的语言模式
+  import("./editor-manager").then(({ updateJsEditorLanguage }) => {
+    updateJsEditorLanguage(framework);
+  });
 
   // 更新UI
   updateFrameworkUI();

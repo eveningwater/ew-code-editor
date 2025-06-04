@@ -7,8 +7,6 @@ import { getCurrentFramework } from "./framework-manager";
  */
 export function runCode() {
   const { html, css, js } = getEditorsCode();
-  const currentFramework = getCurrentFramework();
-
   // 合并代码
   const combinedCode = generateCombinedCode(html, css, js);
   const iframe = $<HTMLIFrameElement>("#preview-frame");
