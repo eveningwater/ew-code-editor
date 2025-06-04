@@ -3,7 +3,7 @@
  */
 import { defaultTemplates, frameworkCDNs } from "../const";
 import { $, $$, showLoading, hideLoading } from "../utils";
-import { getEditorsCode, setEditorsContent } from "./editor-manager";
+import { setEditorsContent } from "./editor-manager";
 import { runCode } from "./preview-manager";
 
 // 当前选择的框架
