@@ -3,7 +3,7 @@ import { $ } from "./utils";
 import { createElement } from "./utils";
 import { pageTemplate } from "./page-template";
 import { createEditors, formatEditorsCode } from "./modules/editor-manager";
-import { initLayout } from "./modules/layout-manager";
+import { initLayout, LayoutType } from "./modules/layout-manager";
 import { setupEventListeners } from "./modules/event-manager";
 import { updateUILanguage } from "./modules/ui-manager";
 import { getConfig } from "./modules/config-manager";
@@ -24,7 +24,7 @@ async function init() {
   await createEditors(config.theme);
 
   // 初始化布局
-  initLayout(config.layout as any);
+  initLayout(config.layout as LayoutType);
 
   // 设置事件监听
   setupEventListeners();
