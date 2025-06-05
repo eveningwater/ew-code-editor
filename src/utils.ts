@@ -173,17 +173,20 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
   return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
 };
 
-export const createElement = (temp: string) =>
-  document.createRange().createContextualFragment(temp);
-
-export const $ = <T extends HTMLElement>(selector: string) => {
-  const element = document.querySelector<T>(selector);
+export const $ = <T extends HTMLElement>(
+  selector: string,
+  el: Document | HTMLElement = document
+) => {
+  const element = el.querySelector<T>(selector);
   if (!element) throw new Error(`Element not found: ${selector}`);
   return element;
 };
 
-export const $$ = <T extends HTMLElement>(selector: string) => {
-  const elements = document.querySelectorAll<T>(selector);
+export const $$ = <T extends HTMLElement, U extends Document | HTMLElement>(
+  selector: string,
+  el?: U
+) => {
+  const elements = (el || document).querySelectorAll<T>(selector);
   if (!elements.length) {
     return [];
   }
@@ -240,5 +243,57 @@ export const hideLoading = (elementId?: string) => {
         loadingElement.classList.remove("active");
       }
     });
+  }
+};
+
+export const on = (
+  element: HTMLElement | Document | Element | Window,
+  type: string,
+  handler: EventListenerOrEventListenerObject,
+  useCapture = false
+) => {
+  if (element && type && handler) {
+    element.addEventListener(type, handler, useCapture);
+  }
+};
+export const off = (
+  element: HTMLElement | Document | Element | Window,
+  type: string,
+  handler: EventListenerOrEventListenerObject,
+  useCapture = false
+) => {
+  if (element && type && handler) {
+    element.removeEventListener(type, handler, useCapture);
+  }
+};
+
+export const addClass = (el: HTMLElement, ...className: string[]) => {
+  return el.classList.add(...className);
+};
+export const removeClass = (el: HTMLElement, ...className: string[]) => {
+  return el.classList.remove(...className);
+};
+
+export const isObject = (value: unknown): value is Record<string, any> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+export const isString = (value: unknown): value is string =>
+  typeof value === "string";
+export const isBoolean = (value: any): value is boolean =>
+  typeof value === "boolean";
+export const handleClassName = (className?: string, status?: boolean) => {
+  const condition = isBoolean(status)
+    ? status
+    : isString(className) && className;
+  return condition ? ` ${className}` : "";
+};
+
+export const createElement = (temp: string) =>
+  document.createRange().createContextualFragment(temp);
+
+export const insertNode = (el: HTMLElement, node: Node, oldNode: Node) => {
+  if (oldNode && el?.contains(oldNode)) {
+    el.replaceChild(node, oldNode);
+  } else {
+    el?.appendChild(node);
   }
 };

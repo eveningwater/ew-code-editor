@@ -13,6 +13,7 @@ import {
 import { $, $$ } from "../utils";
 import loader from "@monaco-editor/loader";
 import { runCode } from "./preview-manager";
+import { ewConfirm } from "../plugins/modal";
 
 // 配置 Monaco 编辑器的 CDN 路径
 loader.config({
@@ -66,6 +67,16 @@ export async function createEditors(theme: string) {
     });
 
     return { htmlEditor, cssEditor, jsEditor };
+  } catch (err) {
+    console.error("Error creating editors:", err);
+    ewConfirm({
+      title: "编辑器加载失败",
+      content: "编辑器加载失败，请刷新页面重试",
+      sureText: "刷新",
+      sure: () => {
+        window.location.reload();
+      },
+    });
   } finally {
     // 无论成功还是失败，都隐藏加载效果
     hideLoading("global");

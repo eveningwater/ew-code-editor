@@ -1,277 +1,424 @@
-# EW代码编辑器项目实现原理分析
+# EW代码编辑器使用文档
 
-## 项目概述
+## 目录
 
-EW代码编辑器是一个基于Web的在线代码编辑器，允许用户编写、预览和运行HTML、CSS和JavaScript代码。该项目使用TypeScript开发，基于Monaco编辑器（VS Code的编辑器核心）构建，支持多种前端框架、主题切换、布局调整等功能。
+- [项目介绍](#项目介绍)
+- [环境要求](#环境要求)
+- [安装与启动](#安装与启动)
+- [界面概览](#界面概览)
+- [基本功能](#基本功能)
+  - [代码编辑](#代码编辑)
+  - [代码运行](#代码运行)
+  - [代码格式化](#代码格式化)
+  - [代码下载](#代码下载)
+  - [新窗口预览](#新窗口预览)
+- [高级功能](#高级功能)
+  - [框架切换](#框架切换)
+  - [主题切换](#主题切换)
+  - [布局调整](#布局调整)
+  - [语言切换](#语言切换)
+  - [依赖管理](#依赖管理)
+- [框架支持](#框架支持)
+  - [原生JavaScript](#原生javascript)
+  - [TypeScript](#typescript)
+  - [React](#react)
+  - [Vue](#vue)
+- [常见问题](#常见问题)
+- [开发指南](#开发指南)
+  - [项目结构](#项目结构)
+  - [模块说明](#模块说明)
+  - [扩展开发](#扩展开发)
+- [性能优化](#性能优化)
+- [浏览器兼容性](#浏览器兼容性)
+- [贡献指南](#贡献指南)
+- [许可证](#许可证)
 
-## 核心架构
+## 项目介绍
 
-项目采用模块化设计，将不同功能划分为独立的模块，每个模块负责特定的功能区域。主要模块包括：
+EW代码编辑器是一个功能强大的Web在线代码编辑器，专为前端开发者设计。它允许用户在浏览器中编写、运行和预览HTML、CSS和JavaScript代码，支持多种前端框架，提供实时预览功能，是学习和测试前端代码的理想工具。
 
-1. **编辑器管理模块**：负责创建和管理Monaco编辑器实例
-2. **预览管理模块**：负责运行和预览代码
-3. **布局管理模块**：负责管理编辑器和预览区域的布局
-4. **事件管理模块**：负责处理用户交互事件
-5. **框架管理模块**：负责管理不同前端框架的支持
-6. **配置管理模块**：负责管理用户配置和偏好设置
-7. **UI管理模块**：负责管理用户界面和多语言支持
+本编辑器基于Monaco编辑器（VS Code的编辑器核心）构建，提供了接近原生IDE的编码体验，包括语法高亮、代码补全、错误提示等功能。同时，它还支持多种布局方式、主题切换、多语言界面等特性，满足不同用户的使用习惯和偏好。
 
-## 关键技术实现
+无论您是前端初学者还是有经验的开发者，EW代码编辑器都能为您提供一个便捷、高效的代码编辑和测试环境，帮助您快速验证想法、学习新技术或解决编码问题。
 
-### 1. 编辑器实现
+## 环境要求
 
-编辑器基于Monaco编辑器实现，通过`@monaco-editor/loader`加载编辑器资源。项目创建了三个编辑器实例，分别用于编辑HTML、CSS和JavaScript代码：
+要运行EW代码编辑器，您需要满足以下环境要求：
 
-```typescript
-// 创建HTML编辑器
-htmlEditor = editorInstance.editor.create($("#html-editor")!, {
-  value: defaultHtmlCode,
-  language: "html",
-  theme,
-  ...baseEditorOptions,
-});
+- **Node.js**: 16.0.0 或更高版本
+- **npm** 或 **pnpm**: 推荐使用pnpm作为包管理工具
+- **现代浏览器**: 推荐使用Chrome、Firefox、Edge等现代浏览器的最新版本
 
-// 创建CSS编辑器
-cssEditor = editorInstance.editor.create($("#css-editor")!, {
-  value: defaultCssCode,
-  language: "css",
-  theme,
-  ...baseEditorOptions,
-});
+## 安装与启动
 
-// 创建JavaScript编辑器
-jsEditor = editorInstance.editor.create($("#js-editor")!, {
-  value: defaultJsCode,
-  language: "javascript",
-  theme,
-  ...baseEditorOptions,
-});
+### 方法一：本地安装
+
+1. 克隆项目仓库
+
+```bash
+git clone https://github.com/yourusername/ew-code-editor.git
+cd ew-code-editor
 ```
 
-编辑器支持代码格式化功能，使用Prettier库实现：
+2. 安装依赖
 
-```typescript
-export async function formatEditorsCode() {
-  try {
-    // 格式化HTML代码
-    const htmlCode = htmlEditor.getValue();
-    const formattedHtmlCode = await format(htmlCode, {
-      parser: "html",
-      plugins: [...],
-      // 格式化配置
-    });
-    htmlEditor.setValue(formattedHtmlCode);
-    
-    // 类似地格式化CSS和JavaScript代码
-  } catch (error) {
-    console.error("Format error:", error);
-  }
-}
+使用pnpm（推荐）：
+
+```bash
+pnpm install
 ```
 
-### 2. 代码预览实现
+或使用npm：
 
-代码预览通过iframe实现，将三种语言的代码合并成一个完整的HTML文档，然后设置到iframe的srcdoc属性中：
-
-```typescript
-export function runCode() {
-  const { html, css, js } = getEditorsCode();
-  // 合并代码
-  const combinedCode = generateCombinedCode(html, css, js);
-  const iframe = $("#preview-frame");
-
-  // 解决不释放iframe内容，导致报错Identifier 'xxx' has already been declared
-  iframe.srcdoc = "about:blank"; // 重置 iframe 内容
-  iframe.srcdoc = combinedCode;
-}
+```bash
+npm install
 ```
 
-代码合并过程中，会根据当前选择的框架，自动添加相应的CDN链接和必要的脚本：
+3. 启动开发服务器
 
-```typescript
-export const generateCombinedCode = (html: string, css: string, js: string) => {
-  // 解析HTML以找到插入点
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  
-  // 添加框架CDN
-  const frameworkCDNs = getFrameworkCDNs();
-  frameworkCDNs.forEach((cdn) => {
-    const scriptElement = doc.createElement("script");
-    scriptElement.src = cdn;
-    doc.head.appendChild(scriptElement);
-  });
-  
-  // 添加用户安装的依赖CDN
-  // 添加CSS
-  // 添加JavaScript
-  
-  return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-};
+```bash
+pnpm dev
 ```
 
-### 3. 布局管理实现
+4. 在浏览器中访问
 
-布局管理使用Split.js库实现可调整大小的分割面板：
+打开浏览器，访问 `http://localhost:5173` 即可使用编辑器。
 
-```typescript
-export function initLayout(layout: LayoutType) {
-  const main = $("main");
+### 方法二：在线使用
 
-  // 移除之前的split实例
-  if (splitInstance) {
-    splitInstance.destroy();
-  }
+您也可以直接访问我们的在线版本，无需安装：
 
-  // 根据布局设置方向和大小
-  switch (layout) {
-    case "horizontal":
-      main.classList.add("horizontal");
-      splitInstance = Split(["#editor-container", "#preview-container"], {
-        direction: "horizontal",
-        sizes: [50, 50],
-        minSize: 200,
-        gutterSize: 8,
-      });
-      break;
-    // 其他布局类型...
-  }
+[EW代码编辑器在线版](https://your-online-url.com)
 
-  // 通知编辑器布局已更改
-  notifyEditorLayoutChange();
-}
+## 界面概览
+
+EW代码编辑器的界面主要由以下几部分组成：
+
+- **顶部工具栏**：包含运行、格式化、下载、新窗口预览等功能按钮，以及框架、主题、布局、语言等下拉菜单。
+- **编辑区域**：包含HTML、CSS和JavaScript三个选项卡，可以切换编辑不同类型的代码。
+- **预览区域**：实时显示代码运行结果的iframe窗口。
+- **依赖管理面板**：可以添加和管理第三方库依赖。
+
+整个界面采用响应式设计，可以适应不同尺寸的屏幕，支持多种布局方式，满足不同用户的使用习惯。
+
+## 基本功能
+
+### 代码编辑
+
+EW代码编辑器提供了三个独立的编辑器，分别用于编辑HTML、CSS和JavaScript代码：
+
+1. **HTML编辑器**：用于编写网页的结构代码，支持HTML5语法。
+2. **CSS编辑器**：用于编写样式代码，支持CSS3特性。
+3. **JavaScript编辑器**：用于编写脚本代码，支持ES6+语法。
+
+每个编辑器都基于Monaco编辑器实现，提供了以下功能：
+
+- **语法高亮**：根据代码类型自动高亮显示不同的语法元素。
+- **代码补全**：智能提示可能的代码补全选项。
+- **错误提示**：实时检测代码中的语法错误并提示。
+- **括号匹配**：自动匹配括号，方便查看代码结构。
+- **行号显示**：显示代码行号，方便定位。
+- **多光标编辑**：支持多光标编辑，提高编码效率。
+
+使用方法：
+
+1. 点击顶部的HTML、CSS或JavaScript选项卡，切换到相应的编辑器。
+2. 在编辑器中输入或粘贴代码。
+3. 编辑器会自动保存您的代码，无需手动保存。
+
+### 代码运行
+
+编写完代码后，您可以立即运行查看效果：
+
+1. 点击顶部工具栏中的「运行」按钮。
+2. 系统会将HTML、CSS和JavaScript代码合并成一个完整的网页。
+3. 合并后的网页会在右侧或下方的预览区域中显示。
+
+代码运行特性：
+
+- **实时预览**：代码修改后，点击运行按钮即可看到最新效果。
+- **框架支持**：自动添加所选框架的CDN链接，无需手动引入。
+- **依赖管理**：自动添加已安装依赖的CDN链接。
+- **错误捕获**：预览区域会显示代码运行时的错误信息。
+
+### 代码格式化
+
+为了保持代码的可读性和一致性，EW代码编辑器提供了代码格式化功能：
+
+1. 点击顶部工具栏中的「格式化」按钮。
+2. 系统会使用Prettier库自动格式化当前的HTML、CSS和JavaScript代码。
+3. 格式化后的代码会替换原有代码，保持缩进、换行等格式的一致性。
+
+格式化配置：
+
+- HTML格式化：使用2空格缩进，单引号，行宽80字符。
+- CSS格式化：使用2空格缩进，行宽80字符。
+- JavaScript格式化：使用2空格缩进，单引号，行宽80字符，保留分号。
+
+### 代码下载
+
+完成代码编写后，您可以下载代码以便在本地使用：
+
+1. 点击顶部工具栏中的「下载」按钮。
+2. 系统会将HTML、CSS和JavaScript代码合并成一个完整的HTML文件。
+3. 浏览器会自动下载这个文件，文件名格式为`code-editor-export-{framework}.html`。
+
+下载的HTML文件包含：
+
+- 完整的HTML结构
+- 内联的CSS样式
+- 内联的JavaScript代码
+- 所选框架的CDN链接
+- 已安装依赖的CDN链接
+
+### 新窗口预览
+
+如果您想在更大的窗口中查看代码运行效果，可以使用新窗口预览功能：
+
+1. 点击顶部工具栏中的「新窗口预览」按钮。
+2. 系统会将合并后的代码在新标签页中打开。
+3. 新窗口中的页面与预览区域中的页面完全相同，但提供了更大的显示空间。
+
+## 高级功能
+
+### 框架切换
+
+EW代码编辑器支持多种前端框架，您可以根据需要切换不同的框架：
+
+1. 点击顶部工具栏中的「框架」下拉菜单。
+2. 选择您想使用的框架，包括：
+   - Vanilla（原生JavaScript）
+   - TypeScript
+   - React
+   - React TypeScript
+   - Vue 2
+   - Vue 3
+   - Vue 2 TypeScript
+   - Vue 3 TypeScript
+3. 切换框架后，编辑器会自动加载相应框架的模板代码和CDN链接。
+
+框架切换注意事项：
+
+- 切换框架会替换当前的代码，请确保在切换前保存重要代码。
+- 不同框架的语法和用法有所不同，请参考相应框架的文档。
+- JavaScript编辑器会根据所选框架自动切换语言模式（JavaScript或TypeScript）。
+
+### 主题切换
+
+EW代码编辑器提供了多种主题，满足不同用户的视觉偏好：
+
+1. 点击顶部工具栏中的「主题」下拉菜单。
+2. 选择您喜欢的主题，包括：
+   - Light（明亮主题）
+   - Dark（暗黑主题）
+   - High Contrast（高对比度主题）
+3. 主题会立即应用到整个编辑器界面。
+
+### 布局调整
+
+EW代码编辑器支持多种布局方式，您可以根据需要调整编辑区域和预览区域的位置和大小：
+
+1. 点击顶部工具栏中的「布局」下拉菜单。
+2. 选择您喜欢的布局，包括：
+   - Horizontal（水平布局，编辑区域和预览区域左右排列）
+   - Vertical（垂直布局，编辑区域和预览区域上下排列）
+   - Preview Right（预览在右，编辑区域占据较大空间）
+   - Preview Bottom（预览在下，编辑区域占据较大空间）
+3. 布局会立即应用。
+
+此外，您还可以通过拖动分隔线来调整编辑区域和预览区域的大小比例。
+
+### 语言切换
+
+EW代码编辑器支持中英文双语界面，您可以根据偏好切换界面语言：
+
+1. 点击顶部工具栏中的「语言」下拉菜单。
+2. 选择您喜欢的语言，包括：
+   - English（英文）
+   - 中文
+3. 界面语言会立即切换，包括按钮文本、菜单项等。
+
+语言设置会保存在浏览器的localStorage中，下次访问时会自动应用上次选择的语言。
+
+### 依赖管理
+
+EW代码编辑器提供了简单的依赖管理功能，允许您添加第三方库：
+
+1. 点击顶部工具栏中的「依赖管理」按钮。
+2. 在弹出的依赖管理面板中，输入您想添加的包名，格式为`package-name@version`，例如`react@18.2.0`。
+3. 点击「安装」按钮，系统会模拟安装过程，并将依赖添加到当前框架的依赖列表中。
+4. 添加的依赖会通过CDN方式加载，自动应用到预览中。
+5. 如需移除依赖，点击依赖项右侧的「×」按钮即可。
+
+依赖管理注意事项：
+
+- 依赖是基于框架的，不同框架的依赖列表是独立的。
+- 依赖通过unpkg.com的CDN服务加载，请确保包名和版本号正确。
+- 如果不指定版本号，系统会加载最新版本。
+- 某些特殊的包（如antd）会自动处理为特定的CDN格式。
+
+## 框架支持
+
+### 原生JavaScript
+
+原生JavaScript模式（Vanilla）是最基本的模式，不依赖任何框架，适合学习基础的HTML、CSS和JavaScript：
+
+- HTML：标准的HTML5结构
+- CSS：标准的CSS3样式
+- JavaScript：支持ES6+语法
+
+示例代码会创建一个简单的页面，包含标题、段落和一个按钮，点击按钮会显示一个提示框。
+
+### TypeScript
+
+TypeScript模式提供了类型安全的JavaScript开发环境：
+
+- 支持TypeScript的类型定义和语法
+- 编辑器会提供TypeScript特有的代码补全和错误检查
+- 代码会在运行前自动编译为JavaScript
+
+示例代码展示了TypeScript的基本用法，包括类型定义、接口和类等特性。
+
+### React
+
+React模式提供了React框架的开发环境：
+
+- 自动加载React和ReactDOM的CDN链接
+- 支持JSX语法
+- 支持React Hooks和组件
+
+React TypeScript模式则结合了React和TypeScript的特性，提供类型安全的React开发环境。
+
+示例代码展示了React组件的创建和使用，包括函数组件、状态管理和事件处理等。
+
+### Vue
+
+Vue模式提供了Vue框架的开发环境，支持Vue 2和Vue 3两个版本：
+
+- 自动加载Vue的CDN链接
+- 支持Vue模板语法
+- 支持Vue组件和指令
+
+Vue TypeScript模式则结合了Vue和TypeScript的特性，提供类型安全的Vue开发环境。
+
+示例代码展示了Vue应用的创建和使用，包括数据绑定、计算属性和方法等。
+
+## 常见问题
+
+### Q: 代码没有自动保存吗？
+
+A: EW代码编辑器目前不支持自动保存到云端，但编辑器内容会保存在浏览器的内存中，刷新页面后内容会丢失。建议定期使用「下载」功能保存您的代码。
+
+### Q: 如何分享我的代码？
+
+A: 目前可以通过「下载」功能保存代码文件，然后通过邮件、聊天工具等方式分享文件。未来版本可能会添加直接生成分享链接的功能。
+
+### Q: 为什么我添加的依赖没有生效？
+
+A: 请检查以下几点：
+1. 包名和版本号是否正确
+2. 是否点击了「运行」按钮更新预览
+3. 是否正确引用了依赖（某些库可能需要特定的引用方式）
+4. 控制台是否有错误信息
+
+### Q: 编辑器支持离线使用吗？
+
+A: 编辑器本身需要在线环境，但您可以下载代码后在本地运行。如果您需要完全离线的编辑器，可以考虑克隆项目并在本地启动开发服务器。
+
+## 开发指南
+
+### 项目结构
+
+EW代码编辑器的项目结构如下：
+
+```
+├── public/            # 静态资源
+├── src/               # 源代码
+│   ├── modules/       # 功能模块
+│   │   ├── config-manager.ts    # 配置管理
+│   │   ├── editor-manager.ts    # 编辑器管理
+│   │   ├── event-manager.ts     # 事件管理
+│   │   ├── framework-manager.ts # 框架管理
+│   │   ├── layout-manager.ts    # 布局管理
+│   │   ├── preview-manager.ts   # 预览管理
+│   │   └── ui-manager.ts        # UI管理
+│   ├── const.ts       # 常量定义
+│   ├── main.ts        # 入口文件
+│   ├── page-template.ts # 页面模板
+│   ├── style.css      # 样式文件
+│   └── utils.ts       # 工具函数
+├── index.html         # HTML入口
+├── package.json       # 项目配置
+├── tsconfig.json      # TypeScript配置
+└── vite.config.ts     # Vite配置
 ```
 
-### 4. 框架支持实现
+### 模块说明
 
-项目支持多种前端框架，包括原生JavaScript、TypeScript、React和Vue等。框架切换时，会更新编辑器内容和语言模式：
+项目采用模块化设计，每个模块负责特定的功能：
 
-```typescript
-export function updateFramework(framework: string) {
-  if (framework === currentFramework) return;
-  // 切换框架
-  currentFramework = framework;
+- **config-manager.ts**：管理用户配置和偏好设置，包括主题、布局、语言等。
+- **editor-manager.ts**：创建和管理Monaco编辑器实例，处理代码编辑相关功能。
+- **event-manager.ts**：处理用户交互事件，包括按钮点击、菜单选择等。
+- **framework-manager.ts**：管理不同前端框架的支持，包括模板代码、CDN链接等。
+- **layout-manager.ts**：管理编辑器和预览区域的布局，处理分割面板的调整。
+- **preview-manager.ts**：处理代码运行和预览，包括代码合并、iframe更新等。
+- **ui-manager.ts**：管理用户界面和多语言支持，处理UI元素的更新和交互。
 
-  // 加载新框架的模板代码
-  const template = defaultTemplates[framework];
-  if (template) {
-    setEditorsContent([
-      { type: "html", content: template.html },
-      { type: "css", content: template.css },
-      { type: "js", content: template.js },
-    ]);
-  }
+### 扩展开发
 
-  // 更新JavaScript编辑器的语言模式
-  updateJsEditorLanguage(framework);
+如果您想为EW代码编辑器添加新功能或修改现有功能，可以按照以下步骤进行：
 
-  // 更新UI
-  updateFrameworkUI();
-}
-```
+1. **添加新框架支持**：
+   - 在`const.ts`中的`defaultTemplates`对象中添加新框架的模板代码
+   - 在`const.ts`中的`frameworkCDNs`对象中添加新框架的CDN链接
+   - 在`page-template.ts`中的框架下拉菜单中添加新框架选项
 
-对于不同的框架，项目会自动添加相应的CDN链接和必要的脚本，以确保代码能够正确运行。例如，对于React框架，会添加React和ReactDOM的CDN链接，并设置Babel转换JSX的配置。
+2. **添加新主题**：
+   - 在`page-template.ts`中的主题下拉菜单中添加新主题选项
+   - 在`style.css`中添加新主题的样式定义
 
-### 5. 依赖管理实现
+3. **添加新语言支持**：
+   - 在`const.ts`中的`translations`对象中添加新语言的翻译
+   - 在`page-template.ts`中的语言下拉菜单中添加新语言选项
 
-项目实现了简单的依赖管理功能，允许用户添加第三方库：
+## 性能优化
 
-```typescript
-export function addDependency(packageName: string) {
-  if (!packageName) return;
+EW代码编辑器在性能方面做了以下优化：
 
-  // 检查依赖是否已存在
-  if (installedDependencies[currentFramework].includes(packageName)) {
-    alert(`Package ${packageName} is already installed.`);
-    return;
-  }
+1. **懒加载**：使用`@monaco-editor/loader`懒加载Monaco编辑器资源，减少初始加载时间。
+2. **CDN加速**：使用CDN加载Monaco编辑器和框架资源，提高加载速度。
+3. **分割面板**：使用Split.js实现可调整大小的分割面板，提高界面响应速度。
+4. **局部更新**：编辑器布局变化时，只更新受影响的编辑器实例，减少不必要的重绘。
+5. **iframe重置**：运行代码前先重置iframe内容，避免内存泄漏和变量冲突。
 
-  // 显示加载效果
-  showLoading("dependency");
+## 浏览器兼容性
 
-  // 模拟安装依赖的过程
-  setTimeout(() => {
-    // 添加到已安装依赖列表
-    installedDependencies[currentFramework].push(packageName);
+EW代码编辑器支持以下现代浏览器的最新版本：
 
-    // 更新依赖列表UI
-    updateDependencyList();
+- Google Chrome
+- Mozilla Firefox
+- Microsoft Edge
+- Apple Safari
 
-    // 清空输入框
-    const input = $("#dependency-input") as HTMLInputElement;
-    if (input) input.value = "";
+由于使用了现代Web技术，编辑器可能不支持旧版浏览器，特别是Internet Explorer。
 
-    // 隐藏加载效果
-    hideLoading("dependency");
+## 贡献指南
 
-    // 运行代码以应用新依赖
-    runCode();
-  }, 1000);
-}
-```
+我们欢迎社区贡献，如果您想为EW代码编辑器做出贡献，请遵循以下步骤：
 
-添加的依赖会通过CDN方式加载，支持指定版本号：
+1. Fork项目仓库
+2. 创建您的特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交您的更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建一个Pull Request
 
-```typescript
-export function getDependencyCDNs() {
-  return installedDependencies[currentFramework]
-    .map((pkg) => {
-      // 特殊处理某些需要特定CDN格式的包
-      if (pkg.startsWith("antd")) {
-        // 对于antd，使用UMD版本
-        const [name, version] = pkg.split("@");
-        const ver = version || "latest";
-        return [
-          `https://unpkg.com/${name}@${ver}/dist/antd.min.js`,
-          `https://unpkg.com/${name}@${ver}/dist/antd.min.css`,
-        ];
-      }
+在提交Pull Request前，请确保您的代码符合项目的代码风格和质量标准。
 
-      // 默认处理方式
-      const [name, version] = pkg.split("@");
-      return version
-        ? `https://unpkg.com/${name}@${version}`
-        : `https://unpkg.com/${name}`;
-    })
-    .flat(); // 使用flat()将嵌套数组展平
-}
-```
+## 许可证
 
-### 6. 多语言支持实现
+EW代码编辑器采用MIT许可证，详情请参阅LICENSE文件。
 
-项目实现了中英文双语支持，通过翻译字典实现：
+---
 
-```typescript
-export function updateUILanguage(language: string) {
-  const t = translations[language];
-
-  $(".logo")!.textContent = t.logo;
-  // 更新按钮文本
-  $("#run-btn")!.textContent = t.run;
-  $("#format-btn")!.textContent = t.format;
-  // 更新其他UI元素...
-}
-```
-
-## 技术亮点
-
-1. **模块化设计**：项目采用清晰的模块化结构，每个模块负责特定功能，便于维护和扩展。
-
-2. **Monaco编辑器集成**：集成了强大的Monaco编辑器，提供语法高亮、自动补全等IDE级功能。
-
-3. **多框架支持**：支持多种前端框架，包括原生JavaScript、TypeScript、React和Vue等。
-
-4. **实时预览**：通过iframe实现代码实时预览，提供良好的开发体验。
-
-5. **灵活的布局**：支持多种布局方式，满足不同用户的使用习惯。
-
-6. **依赖管理**：实现了简单的依赖管理功能，允许用户添加第三方库。
-
-7. **多语言支持**：支持中英文双语，提高国际化水平。
-
-8. **本地存储**：使用localStorage保存用户配置，提供持久化的用户体验。
-
-## 总结
-
-EW代码编辑器是一个功能完善的在线代码编辑器，通过模块化设计和现代Web技术，实现了类似CodePen、JSFiddle的功能。项目结构清晰，代码质量高，具有良好的可维护性和可扩展性。通过集成Monaco编辑器和支持多种前端框架，为用户提供了接近原生IDE的开发体验。
-        
+感谢您使用EW代码编辑器！如有任何问题或建议，请通过GitHub Issues或电子邮件与我们联系。
