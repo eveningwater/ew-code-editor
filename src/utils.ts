@@ -90,7 +90,7 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
       scriptElement.type = "text/babel";
     }
 
-    // 对于TypeScript相关框架，添加type="text/typescript"属性
+    // 对于TypeScript相关框架，添加类型声明和编译配置
     if (currentFramework.includes("ts") || currentFramework === "typescript") {
       // 添加TypeScript编译选项
       const tsConfigScript = doc.createElement("script");
@@ -111,6 +111,18 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
             esModuleInterop: true
           }
         };
+
+        // 添加Vue类型声明
+        if (typeof Vue !== 'undefined') {
+          // Vue 2 类型声明
+          if (Vue.version && Vue.version.startsWith('2')) {
+            window.Vue = Vue;
+          }
+          // Vue 3 类型声明
+          else if (Vue.createApp) {
+            window.Vue = Vue;
+          }
+        }
       `;
       doc.head.appendChild(tsConfigScript);
 
@@ -121,6 +133,19 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
         scriptElement.type = "text/babel";
         scriptElement.setAttribute("data-type", "module");
         scriptElement.setAttribute("data-presets", "typescript,react");
+
+        // 添加React类型声明的内联脚本
+        const reactTypesScript = doc.createElement("script");
+        reactTypesScript.textContent = `
+          // 内联React类型声明，避免加载外部.d.ts文件
+          window.React = window.React || {};
+          window.ReactDOM = window.ReactDOM || {};
+        `;
+        // 先将reactTypesScript添加到head中
+        doc.head.appendChild(reactTypesScript);
+
+        // 然后设置scriptElement的内容并添加到body中
+        scriptElement.textContent = originalCode;
       } else {
         // 对于其他TypeScript框架，使用TypeScript编译器
         const wrappedCode = `

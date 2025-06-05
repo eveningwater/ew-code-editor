@@ -282,17 +282,8 @@ ReactDOM.render(
     background-color: #21a8f3;
   }`,
     js: `// React with TypeScript
-import React from 'react';
-import ReactDOM from 'react-dom';
-interface AppProps {}
-
-interface AppState {
-  count: number;
-}
-
-// React component with TypeScript
-function App(): React.ReactElement {
-  const [count, setCount] = React.useState<number>(0);
+function App() {
+  const [count, setCount] = React.useState(0);
 
   return (
     <div className="app">
@@ -463,6 +454,9 @@ createApp(App).mount('#app');`,
     background-color: #36a070;
   }`,
     js: `// Vue 2 with TypeScript
+// 声明Vue类型，避免TypeScript报错
+declare const Vue: any;
+
 interface AppData {
   count: number;
 }
@@ -528,6 +522,9 @@ new Vue({
     background-color: #36a070;
   }`,
     js: `// Vue 3 with TypeScript
+// 声明Vue类型，避免TypeScript报错
+declare const Vue: any;
+
 const { createApp, ref, defineComponent } = Vue;
 
 interface User {
@@ -538,8 +535,8 @@ interface User {
 // Vue 3 application with TypeScript
 const App = defineComponent({
   setup() {
-    const count = ref<number>(0);
-    const user = ref<User>({ name: 'User', age: 25 });
+    const count = ref(0);
+    const user = ref({ name: 'User', age: 25 });
     
     const increment = (): void => {
       count.value++;
@@ -603,14 +600,4 @@ export const baseEditorOptions = {
   scrollBeyondLastLine: false,
   fontSize: 14,
   tabSize: 2,
-};
-
-export const editorEnvPathPrefix = "monaco-editor/esm/vs";
-
-export const workerPaths: Record<string, string> = {
-  json: `${editorEnvPathPrefix}/language/json/json.worker.js`,
-  css: `${editorEnvPathPrefix}/language/css/css.worker.js`,
-  html: `${editorEnvPathPrefix}/language/html/html.worker.js`,
-  javascript: `${editorEnvPathPrefix}/language/typescript/ts.worker.js`,
-  editor: `${editorEnvPathPrefix}/editor/editor.worker.js`,
 };
