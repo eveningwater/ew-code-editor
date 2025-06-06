@@ -239,7 +239,72 @@ export function getDependencyCDNs() {
 
 ### 6. 多语言支持实现
 
-项目实现了中英文双语支持，通过翻译字典实现：
+项目实现了中英文双语支持，通过翻译字典和本地存储实现。多语言支持的核心组件包括：
+
+#### 6.1 翻译字典定义
+
+在`const.ts`文件中定义了翻译字典，包含英文和中文两种语言的所有UI文本：
+
+```typescript
+export const translations: Record<string, Record<string, string>> = {
+  en: {
+    run: "Run",
+    format: "Format",
+    download: "Download",
+    newWindow: "New Window",
+    theme: "Theme",
+    light: "Light",
+    dark: "Dark",
+    highContrast: "High Contrast",
+    layout: "Layout",
+    horizontal: "Horizontal",
+    vertical: "Vertical",
+    previewRight: "Preview Right",
+    previewBottom: "Preview Bottom",
+    language: "Language",
+    english: "English",
+    chinese: "中文",
+    logo: "CodeEditor",
+    framework: "Framework",
+    vanilla: "Vanilla",
+    react: "React",
+    vue: "Vue",
+    dependencies: "Dependencies",
+    install: "Install",
+    close: "Close",
+  },
+  zh: {
+    run: "运行",
+    format: "格式化",
+    download: "下载",
+    newWindow: "新窗口预览",
+    theme: "主题",
+    light: "明亮",
+    dark: "暗黑",
+    highContrast: "高对比度",
+    layout: "布局",
+    horizontal: "水平",
+    vertical: "垂直",
+    previewRight: "预览在右",
+    previewBottom: "预览在下",
+    language: "语言",
+    english: "English",
+    chinese: "中文",
+    logo: "代码编辑器",
+    framework: "框架",
+    vanilla: "原生",
+    react: "React",
+    vue: "Vue",
+    dependencies: "依赖管理",
+    install: "安装",
+    close: "关闭",
+  },
+};
+```
+
+#### 6.2 UI文本更新函数
+
+在`ui-manager.ts`模块中，`updateUILanguage`函数负责根据当前选择的语言更新所有UI元素的文本：
 
 ```typescript
 export function updateUILanguage(language: string) {
@@ -249,9 +314,158 @@ export function updateUILanguage(language: string) {
   // 更新按钮文本
   $("#run-btn")!.textContent = t.run;
   $("#format-btn")!.textContent = t.format;
-  // 更新其他UI元素...
+  $("#download-btn")!.textContent = t.download;
+  $("#new-window-btn")!.textContent = t.newWindow;
+
+  // 更新下拉菜单标题
+  $("#framework-dropdown .dropdown-toggle")!.textContent = t.framework;
+  $("#theme-dropdown .dropdown-toggle")!.textContent = t.theme;
+  $("#layout-dropdown .dropdown-toggle")!.textContent = t.layout;
+  $("#language-dropdown .dropdown-toggle")!.textContent = t.language;
+
+  // 更新框架选项
+  const frameworkItems = $$("#framework-dropdown .dropdown-menu a");
+  frameworkItems[0].textContent = t.vanilla;
+
+  // 更新主题选项
+  const themeItems = $$("#theme-dropdown .dropdown-menu a");
+  themeItems[0].textContent = t.light;
+  themeItems[1].textContent = t.dark;
+  themeItems[2].textContent = t.highContrast;
+
+  // 更新布局选项
+  const layoutItems = $$("#layout-dropdown .dropdown-menu a");
+  layoutItems[0].textContent = t.horizontal;
+  layoutItems[1].textContent = t.vertical;
+  layoutItems[2].textContent = t.previewRight;
+  layoutItems[3].textContent = t.previewBottom;
+
+  // 更新语言选项
+  const langItems = $$("#language-dropdown .dropdown-menu a");
+  langItems[0].textContent = t.english;
+  langItems[1].textContent = t.chinese;
+
+  // 更新依赖管理面板
+  $("#dependency-manager .dependency-header h3")!.textContent = t.dependencies;
+  $("#install-btn")!.textContent = t.install;
+  $("#close-dependency-btn")!.textContent = t.close;
+  $("#add-dependency-btn")!.textContent = t.dependencies;
 }
 ```
+
+#### 6.3 语言配置管理
+
+在`config-manager.ts`模块中，定义了语言配置的存储和更新方法：
+
+```typescript
+// 默认配置
+const defaultConfig: EditorConfig = {
+  theme: "vs-dark",
+  layout: "horizontal",
+  language: "zh",  // 默认使用中文
+  framework: "vanilla",
+};
+
+// 当前配置
+let currentConfig: EditorConfig = {
+  ...defaultConfig,
+  language: localStorage.getItem("editor-language") || defaultConfig.language,
+  framework:
+    localStorage.getItem("editor-framework") || defaultConfig.framework,
+};
+
+/**
+ * 更新语言配置
+ * @param language 语言
+ */
+export function updateLanguage(language: string) {
+  currentConfig.language = language;
+  localStorage.setItem("editor-language", language);
+}
+```
+
+#### 6.4 语言切换事件处理
+
+在`event-manager.ts`模块中，设置了语言切换的事件监听器：
+
+```typescript
+// 语言切换
+$$("a[data-lang]").forEach((item) => {
+  item.addEventListener("click", (e) => {
+    e.preventDefault();
+    const lang = (e.currentTarget as HTMLElement).getAttribute("data-lang");
+    const config = getConfig();
+    if (lang && lang !== config.language) {
+      updateLanguage(lang);
+      updateUILanguage(lang);
+    }
+    // 关闭下拉菜单
+    closeAllDropdowns();
+  });
+});
+```
+
+#### 6.5 语言选择UI
+
+在`page-template.ts`中定义了语言选择的下拉菜单：
+
+```html
+<div class="dropdown" id="language-dropdown">
+  <button class="btn dropdown-toggle">Language</button>
+  <div class="dropdown-menu">
+    <a href="#" data-lang="en">English</a>
+    <a href="#" data-lang="zh">中文</a>
+  </div>
+</div>
+```
+
+#### 6.6 应用初始化时的语言设置
+
+在`main.ts`的初始化函数中，应用了保存的语言设置：
+
+```typescript
+async function init() {
+  // 创建DOM结构
+  const app = $("#app");
+  app.appendChild(createElement(pageTemplate));
+
+  // 获取当前配置
+  const config = getConfig();
+
+  // 创建编辑器
+  await createEditors(config.theme);
+
+  // 初始化布局
+  initLayout(config.layout as LayoutType);
+
+  // 设置事件监听
+  setupEventListeners();
+
+  // 应用语言设置
+  updateUILanguage(config.language);
+
+  // 设置初始主题
+  document.body.setAttribute("data-theme", config.theme);
+
+  // 设置初始框架
+  updateFramework("vanilla");
+
+  // 运行初始代码
+  runCode();
+
+  // 格式化代码
+  formatEditorsCode();
+}
+```
+
+#### 6.7 多语言支持的扩展性
+
+项目的多语言支持设计具有良好的扩展性，如果需要添加新的语言，只需要：
+
+1. 在`const.ts`的`translations`对象中添加新语言的翻译
+2. 在`page-template.ts`的语言下拉菜单中添加新语言选项
+
+这种设计使得添加新语言非常简单，无需修改核心逻辑代码。
 
 ## 技术亮点
 
@@ -267,11 +481,11 @@ export function updateUILanguage(language: string) {
 
 6. **依赖管理**：实现了简单的依赖管理功能，允许用户添加第三方库。
 
-7. **多语言支持**：支持中英文双语，提高国际化水平。
+7. **多语言支持**：支持中英文双语，提高国际化水平。通过翻译字典和本地存储实现，具有良好的扩展性，可以轻松添加更多语言支持。
 
 8. **本地存储**：使用localStorage保存用户配置，提供持久化的用户体验。
 
 ## 总结
 
-EW代码编辑器是一个功能完善的在线代码编辑器，通过模块化设计和现代Web技术，实现了类似CodePen、JSFiddle的功能。项目结构清晰，代码质量高，具有良好的可维护性和可扩展性。通过集成Monaco编辑器和支持多种前端框架，为用户提供了接近原生IDE的开发体验。
+EW代码编辑器是一个功能完善的在线代码编辑器，通过模块化设计和现代Web技术，实现了类似CodePen、JSFiddle的功能。项目结构清晰，代码质量高，具有良好的可维护性和可扩展性。通过集成Monaco编辑器和支持多种前端框架，为用户提供了接近原生IDE的开发体验。多语言支持的实现简洁而高效，通过翻译字典和本地存储，实现了完整的国际化支持，并且具有良好的扩展性。
         
