@@ -38,8 +38,6 @@
     - [扩展开发](#扩展开发)
   - [性能优化](#性能优化)
   - [浏览器兼容性](#浏览器兼容性)
-  - [贡献指南](#贡献指南)
-  - [许可证](#许可证)
 
 ## 项目介绍
 
@@ -411,23 +409,5 @@ EW代码编辑器支持以下现代浏览器的最新版本：
 - Apple Safari
 
 由于使用了现代Web技术，编辑器可能不支持旧版浏览器，特别是Internet Explorer。
-
-## 贡献指南
-
-我们欢迎社区贡献，如果您想为EW代码编辑器做出贡献，请遵循以下步骤：
-
-1. Fork项目仓库
-2. 创建您的特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交您的更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建一个Pull Request
-
-在提交Pull Request前，请确保您的代码符合项目的代码风格和质量标准。
-
-## 许可证
-
-EW代码编辑器采用MIT许可证，详情请参阅LICENSE文件。
-
----
 
 感谢您使用EW代码编辑器！如有任何问题或建议，请通过GitHub Issues或电子邮件与我们联系。
