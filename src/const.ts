@@ -58,21 +58,11 @@ export const translations: Record<string, Record<string, string>> = {
 // 默认代码模板
 export const defaultTemplates = {
   vanilla: {
-    html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vanilla JS Demo</title>
-</head>
-<body>
-  <div class="container">
+    html: `<div class="container">
     <h1>Hello, Vanilla JS!</h1>
     <p>This is a simple Vanilla JavaScript example.</p>
     <button id="demo-btn">Click Me</button>
-  </div>
-</body>
-</html>`,
+  </div>`,
     css: `body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -112,21 +102,11 @@ export const defaultTemplates = {
   });`,
   },
   typescript: {
-    html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TypeScript Demo</title>
-</head>
-<body>
-  <div class="container">
+    html: `<div class="container">
     <h1>Hello, TypeScript!</h1>
     <p>This is a simple TypeScript example.</p>
     <button id="demo-btn">Click Me</button>
-  </div>
-</body>
-</html>`,
+  </div>`,
     css: `body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -225,6 +205,8 @@ document.getElementById('demo-btn')?.addEventListener('click', function() {
     background-color: #21a8f3;
   }`,
     js: `// React component
+import React from 'react';
+import ReactDOM from 'react-dom';
 function App() {
   const [count, setCount] = React.useState(0);
 
@@ -283,10 +265,11 @@ ReactDOM.render(
   button:hover {
     background-color: #21a8f3;
   }`,
-    js: `// React with TypeScript
+    js: `
+import React from 'react';
+import ReactDOM from 'react-dom';
 function App() {
   const [count, setCount] = React.useState(0);
-
   return (
     <div className="app">
       <h1>React TypeScript App</h1>
@@ -298,7 +281,6 @@ function App() {
   );
 }
 
-// Render the App component to the DOM
 ReactDOM.render(
   <App />,
   document.getElementById('root')
@@ -395,9 +377,8 @@ new Vue({
   button:hover {
     background-color: #36a070;
   }`,
-    js: `// Vue 3 application
-const { createApp, ref } = Vue;
-
+    js: `
+import { createApp, ref } from 'vue';
 const App = {
   setup() {
     const count = ref(0);
@@ -455,15 +436,11 @@ createApp(App).mount('#app');`,
   button:hover {
     background-color: #36a070;
   }`,
-    js: `// Vue 2 with TypeScript
-// 声明Vue类型，避免TypeScript报错
-declare const Vue: any;
-
+    js: `
 interface AppData {
   count: number;
 }
 
-// Vue application with TypeScript
 new Vue({
   el: '#app',
   data(): AppData {
@@ -523,22 +500,18 @@ new Vue({
   button:hover {
     background-color: #36a070;
   }`,
-    js: `// Vue 3 with TypeScript
-// 声明Vue类型，避免TypeScript报错
-declare const Vue: any;
-
-const { createApp, ref, defineComponent } = Vue;
+    js: `
+import { createApp, ref, defineComponent } from 'vue';
 
 interface User {
   name: string;
   age: number;
 }
 
-// Vue 3 application with TypeScript
 const App = defineComponent({
   setup() {
-    const count = ref(0);
-    const user = ref({ name: 'User', age: 25 });
+    const count = ref<number>(0);
+    const user = ref<User>({ name: 'User', age: 25 });
     
     const increment = (): void => {
       count.value++;

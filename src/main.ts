@@ -15,7 +15,7 @@ import { updateFramework } from "./modules/framework-manager";
  */
 async function init() {
   // 创建DOM结构
-  const app = $("#app");
+  const app = $("#app")!;
   app.appendChild(createElement(pageTemplate));
 
   // 获取当前配置

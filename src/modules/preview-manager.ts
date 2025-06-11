@@ -9,7 +9,7 @@ export function runCode() {
   const { html, css, js } = getEditorsCode();
   // 合并代码
   const combinedCode = generateCombinedCode(html, css, js);
-  const iframe = $<HTMLIFrameElement>("#preview-frame");
+  const iframe = $<HTMLIFrameElement>("#preview-frame")!;
 
   // 解决不释放iframe内容，导致报错Identifier 'xxx' has already been declared
   iframe.srcdoc = "about:blank"; // 重置 iframe 内容

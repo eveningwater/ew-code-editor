@@ -68,7 +68,6 @@ export async function createEditors(theme: string) {
 
     return { htmlEditor, cssEditor, jsEditor };
   } catch (err) {
-    console.error("Error creating editors:", err);
     ewConfirm({
       title: "编辑器加载失败",
       content: "编辑器加载失败，请刷新页面重试",
@@ -88,7 +87,7 @@ export async function createEditors(theme: string) {
  * @param theme 主题名称
  */
 export function updateEditorsTheme(theme: string) {
-  monaco.editor.setTheme(theme);
+  editorInstance?.editor.setTheme(theme);
   htmlEditor.updateOptions({ theme });
   cssEditor.updateOptions({ theme });
   jsEditor.updateOptions({ theme });

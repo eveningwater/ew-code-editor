@@ -72,7 +72,7 @@ export default class createPopBox {
               right: 0;
               top: 0;
               bottom: 0;
-              background-color: rgba(0, 0, 0, 0.6);
+              background-color: rgba(0, 0, 0, 0.2);
               z-index: 2001;
               transition: all 0.6s;
             }
@@ -97,7 +97,6 @@ export default class createPopBox {
             .ew-pop-box-wrapper {
               min-width: 300px;
               min-height: 80px;
-              background-color: #ffffff;
               position: absolute;
               left: 50%;
               top: 50%;

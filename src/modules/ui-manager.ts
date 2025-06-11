@@ -128,7 +128,7 @@ export function closeAllDropdowns() {
  * 为预览框添加事件监听
  */
 export function setupPreviewFrameListeners() {
-  const previewFrame = $<HTMLIFrameElement>("#preview-frame");
+  const previewFrame = $<HTMLIFrameElement>("#preview-frame")!;
   previewFrame.addEventListener("load", () => {
     // 当iframe加载完成后，为其内部文档添加点击事件
     const iframeDoc =

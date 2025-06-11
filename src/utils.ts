@@ -176,11 +176,7 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
 export const $ = <T extends HTMLElement>(
   selector: string,
   el: Document | HTMLElement = document
-) => {
-  const element = el.querySelector<T>(selector);
-  if (!element) throw new Error(`Element not found: ${selector}`);
-  return element;
-};
+) => el.querySelector<T>(selector);
 
 export const $$ = <T extends HTMLElement, U extends Document | HTMLElement>(
   selector: string,

@@ -19,7 +19,7 @@ export type LayoutType =
  * @param layout 布局类型
  */
 export function initLayout(layout: LayoutType) {
-  const main = $("main");
+  const main = $("main")!;
 
   // 移除之前的split实例
   if (splitInstance) {
