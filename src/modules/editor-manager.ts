@@ -285,7 +285,6 @@ export async function createEditors(theme: string) {
     // 等待编辑器完全加载
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    return { htmlEditor, cssEditor, jsEditor };
   } catch (err) {
     logger.error('Editor creation error:', err);
     ewConfirm({
@@ -300,6 +299,7 @@ export async function createEditors(theme: string) {
     // 无论成功还是失败，都隐藏加载效果
     hideLoading("global");
   }
+  return { htmlEditor, cssEditor, jsEditor };
 }
 
 /**
@@ -409,7 +409,7 @@ export async function formatEditorsCode() {
         // 移除简单的类型注解，如 : string, : number, : boolean
         processedCode = processedCode.replace(/: (string|number|boolean|any)\b/g, '');
         // 移除函数参数的类型注解，但保留参数名
-        processedCode = processedCode.replace(/\(([^)]*)\)/g, (match, params) => {
+        processedCode = processedCode.replace(/\(([^)]*)\)/g, (_match, params) => {
           return '(' + params.replace(/: [^,)]+/g, '') + ')';
         });
         // 移除接口定义

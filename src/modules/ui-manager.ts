@@ -9,7 +9,7 @@ export function updateUILanguage(language: string) {
   const t = translations[language];
   if (!t) return;
 
-  $(".logo")!.textContent = t.logo;
+  $(".logo")!.textContent = t.logo || '';
   // 更新按钮文本
   $("#run-btn")!.textContent = t.run || '';
   $("#format-btn")!.textContent = t.format || '';
@@ -25,25 +25,25 @@ export function updateUILanguage(language: string) {
 
   // 更新框架选项
   const frameworkItems = $$("#framework-dropdown .dropdown-menu a");
-  frameworkItems[0].textContent = t.vanilla || '';
+  frameworkItems[0]!.textContent = t.vanilla || '';
 
   // 更新主题选项
   const themeItems = $$("#theme-dropdown .dropdown-menu a");
-  themeItems[0].textContent = t.light || '';
-  themeItems[1].textContent = t.dark || '';
-  themeItems[2].textContent = t.highContrast || '';
+  themeItems[0]!.textContent = t.light || '';
+  themeItems[1]!.textContent = t.dark || '';
+  themeItems[2]!.textContent = t.highContrast || '';
 
   // 更新布局选项
   const layoutItems = $$("#layout-dropdown .dropdown-menu a");
-  layoutItems[0].textContent = t.horizontal || '';
-  layoutItems[1].textContent = t.vertical || '';
-  layoutItems[2].textContent = t.previewRight || '';
-  layoutItems[3].textContent = t.previewBottom || '';
+  layoutItems[0]!.textContent = t.horizontal || '';
+  layoutItems[1]!.textContent = t.vertical || '';
+  layoutItems[2]!.textContent = t.previewRight || '';
+  layoutItems[3]!.textContent = t.previewBottom || '';
 
   // 更新语言选项
   const langItems = $$("#language-dropdown .dropdown-menu a");
-  langItems[0].textContent = t.english || '';
-  langItems[1].textContent = t.chinese || '';
+  langItems[0]!.textContent = t.english || '';
+  langItems[1]!.textContent = t.chinese || '';
 
   // 更新依赖管理面板
   $("#dependency-manager .dependency-header h3")!.textContent = t.dependencies || '';
