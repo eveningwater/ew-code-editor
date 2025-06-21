@@ -4,6 +4,7 @@ export const pageTemplate = ` <div class="container">
       <div class="controls">
         <button id="run-btn" class="btn primary">Run</button>
         <button id="format-btn" class="btn">Format</button>
+        <button id="ts-check-btn" class="btn">TS Check</button>
         <button id="download-btn" class="btn">Download</button>
         <button id="new-window-btn" class="btn">New Window</button>
         <button id="add-dependency-btn" class="btn">Dependencies</button>

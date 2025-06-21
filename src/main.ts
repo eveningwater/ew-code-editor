@@ -9,6 +9,7 @@ import { updateUILanguage } from "./modules/ui-manager";
 import { getConfig } from "./modules/config-manager";
 import { runCode } from "./modules/preview-manager";
 import { updateFramework } from "./modules/framework-manager";
+import { logger } from "./utils";
 
 /**
  * 初始化应用
@@ -43,7 +44,11 @@ async function init() {
   runCode();
 
   // 格式化代码
-  formatEditorsCode();
+  try {
+    await formatEditorsCode();
+  } catch (error) {
+    logger.error("Initial format error:", error);
+  }
 }
 
 // 启动应用

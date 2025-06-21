@@ -56,29 +56,35 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     doc.head.appendChild(styleElement);
   }
 
-  // 为React和其他需要CommonJS模块系统的库添加模拟的require函数
-  if (currentFramework === "react" || dependencyCDNs.length > 0) {
-    const requireScript = doc.createElement("script");
-    requireScript.textContent = `
-      // 模拟CommonJS的require函数
-      window.require = function(module) {
-        // 简单的模块映射
-        const modules = {
-          'react': window.React,
-          'react-dom': window.ReactDOM,
-          'antd': window.antd
-        };
-        
-        // 返回请求的模块
-        if (modules[module]) {
-          return modules[module];
+  // 为React和其他需要ES模块系统的库添加模块映射
+  if (currentFramework.includes("react") || currentFramework.includes("vue")) {
+    const moduleMapScript = doc.createElement("script");
+    moduleMapScript.textContent = `
+      // 创建模块映射系统
+      window.__moduleMap = {
+        'react': window.React,
+        'react-dom': window.ReactDOM,
+        'vue': window.Vue,
+        'vue3': window.Vue
+      };
+      
+      // 模拟ES模块的import
+      window.__importModule = function(moduleName) {
+        const module = window.__moduleMap[moduleName];
+        if (module) {
+          return Promise.resolve(module);
         } else {
-          console.warn('Module not found:', module);
-          return {};
+          console.warn('Module not found:', moduleName);
+          return Promise.resolve({});
         }
       };
+      
+      // 模拟动态import
+      window.import = function(moduleName) {
+        return window.__importModule(moduleName);
+      };
     `;
-    doc.head.appendChild(requireScript);
+    doc.head.appendChild(moduleMapScript);
   }
 
   // 添加JavaScript
@@ -86,8 +92,10 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     const scriptElement = doc.createElement("script");
 
     // 对于React，需要使用Babel转换JSX
-    if (currentFramework === "react" || currentFramework === "react-ts") {
+    if (currentFramework.includes("react")) {
       scriptElement.type = "text/babel";
+      scriptElement.setAttribute("data-presets", "react");
+      scriptElement.setAttribute("data-type", "module");
     }
 
     // 对于TypeScript相关框架，添加类型声明和编译配置
@@ -97,7 +105,9 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
       tsConfigScript.textContent = `
         // TypeScript编译选项
         window.ts = window.ts || {};
-        window.ts.transpileModule = window.ts.transpileModule || function(code) { return { outputText: code }; };
+        window.ts.transpileModule = window.ts.transpileModule || function(code, options) { 
+          return { outputText: code }; 
+        };
         
         // 设置TypeScript编译选项
         var tsConfig = {
@@ -107,21 +117,16 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
             jsx: "react",
             jsxFactory: "React.createElement",
             jsxFragmentFactory: "React.Fragment",
-            strict: true,
-            esModuleInterop: true
+            strict: false,
+            esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+            skipLibCheck: true
           }
         };
 
         // 添加Vue类型声明
         if (typeof Vue !== 'undefined') {
-          // Vue 2 类型声明
-          if (Vue.version && Vue.version.startsWith('2')) {
-            window.Vue = Vue;
-          }
-          // Vue 3 类型声明
-          else if (Vue.createApp) {
-            window.Vue = Vue;
-          }
+          window.Vue = Vue;
         }
       `;
       doc.head.appendChild(tsConfigScript);
@@ -137,14 +142,20 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
         // 添加React类型声明的内联脚本
         const reactTypesScript = doc.createElement("script");
         reactTypesScript.textContent = `
-          // 内联React类型声明，避免加载外部.d.ts文件
-          window.React = window.React || {};
-          window.ReactDOM = window.ReactDOM || {};
+          // 内联React类型声明
+          if (typeof React !== 'undefined') {
+            window.React = React;
+          }
+          if (typeof ReactDOM !== 'undefined') {
+            window.ReactDOM = ReactDOM;
+          }
         `;
-        // 先将reactTypesScript添加到head中
         doc.head.appendChild(reactTypesScript);
 
-        // 然后设置scriptElement的内容并添加到body中
+        // 设置scriptElement的内容
+        scriptElement.textContent = originalCode;
+      } else if (currentFramework === "vue-ts" || currentFramework === "vue3-ts") {
+        // 对于Vue TypeScript，直接使用原始代码，让Vue处理
         scriptElement.textContent = originalCode;
       } else {
         // 对于其他TypeScript框架，使用TypeScript编译器
@@ -293,3 +304,89 @@ export const insertNode = (el: HTMLElement, node: Node, oldNode: Node) => {
     el?.appendChild(node);
   }
 };
+
+/**
+ * 控制台信息主题系统
+ */
+class ConsoleTheme {
+  private static styles = {
+    success: 'color: #10b981; font-weight: bold;',
+    info: 'color: #3b82f6; font-weight: bold;',
+    warning: 'color: #f59e0b; font-weight: bold;',
+    error: 'color: #ef4444; font-weight: bold;',
+    debug: 'color: #8b5cf6; font-weight: bold;',
+    title: 'color: #1f2937; font-weight: bold; font-size: 14px;',
+    subtitle: 'color: #6b7280; font-weight: normal; font-size: 12px;',
+    highlight: 'color: #059669; font-weight: bold; background: #d1fae5; padding: 2px 4px; border-radius: 3px;',
+    code: 'color: #7c3aed; font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace; background: #f3f4f6; padding: 1px 3px; border-radius: 2px;',
+  };
+
+  private static icons = {
+    success: '✅',
+    info: 'ℹ️',
+    warning: '⚠️',
+    error: '❌',
+    debug: '🐛',
+    title: '📋',
+    subtitle: '📝',
+    highlight: '✨',
+    code: '💻',
+  };
+
+  static success(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.success} ${message}`, this.styles.success, ...args);
+  }
+
+  static info(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.info} ${message}`, this.styles.info, ...args);
+  }
+
+  static warning(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.warning} ${message}`, this.styles.warning, ...args);
+  }
+
+  static error(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.error} ${message}`, this.styles.error, ...args);
+  }
+
+  static debug(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.debug} ${message}`, this.styles.debug, ...args);
+  }
+
+  static title(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.title} ${message}`, this.styles.title, ...args);
+  }
+
+  static subtitle(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.subtitle} ${message}`, this.styles.subtitle, ...args);
+  }
+
+  static highlight(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.highlight} ${message}`, this.styles.highlight, ...args);
+  }
+
+  static code(message: string, ...args: any[]) {
+    console.log(`%c${this.icons.code} ${message}`, this.styles.code, ...args);
+  }
+
+  static group(title: string, callback: () => void) {
+    console.group(`%c${this.icons.title} ${title}`, this.styles.title);
+    callback();
+    console.groupEnd();
+  }
+
+  static table(data: any) {
+    console.table(data);
+  }
+
+  static time(label: string) {
+    console.time(label);
+  }
+
+  static timeEnd(label: string) {
+    console.timeEnd(label);
+  }
+}
+
+// 导出控制台主题
+export const logger = ConsoleTheme;

@@ -4,6 +4,7 @@ export const translations: Record<string, Record<string, string>> = {
   en: {
     run: "Run",
     format: "Format",
+    tsCheck: "TS Check",
     download: "Download",
     newWindow: "New Window",
     theme: "Theme",
@@ -30,6 +31,7 @@ export const translations: Record<string, Record<string, string>> = {
   zh: {
     run: "运行",
     format: "格式化",
+    tsCheck: "TS检查",
     download: "下载",
     newWindow: "新窗口预览",
     theme: "主题",
@@ -142,25 +144,20 @@ export const defaultTemplates = {
     background-color: #005a9c;
   }`,
     js: `// TypeScript code
-interface Person {
-  name: string;
-  age: number;
-}
-
 class Greeter {
-  greeting: string;
+  greeting;
 
-  constructor(message: string) {
+  constructor(message) {
     this.greeting = message;
   }
 
-  greet(person: Person): string {
+  greet(person) {
     return \`Hello, \${person.name}! You are \${person.age} years old. \${this.greeting}\`;
   }
 }
 
-const greeter = new Greeter("Welcome to TypeScript!");
-const user: Person = { name: "User", age: 25 };
+const greeter = new Greeter('Welcome to TypeScript!');
+const user = { name: 'User', age: 25 };
 
 document.getElementById('demo-btn')?.addEventListener('click', function() {
   alert(greeter.greet(user));
@@ -205,8 +202,8 @@ document.getElementById('demo-btn')?.addEventListener('click', function() {
     background-color: #21a8f3;
   }`,
     js: `// React component
-import React from 'react';
-import ReactDOM from 'react-dom';
+const React = window.React;
+const ReactDOM = window.ReactDOM;
 function App() {
   const [count, setCount] = React.useState(0);
 
@@ -266,23 +263,28 @@ ReactDOM.render(
     background-color: #21a8f3;
   }`,
     js: `
-import React from 'react';
-import ReactDOM from 'react-dom';
-function App() {
-  const [count, setCount] = React.useState(0);
-  return (
-    <div className="app">
-      <h1>React TypeScript App</h1>
-      <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>
-        Click me
-      </button>
-    </div>
+const React = window.React;
+const ReactDOM = window.ReactDOM;
+const { useState } = React;
+
+const App = () => {
+  const [count, setCount] = useState(0);
+  const [user, setUser] = useState({ name: 'User', age: 25 });
+
+  const handleClick = () => {
+    setCount(count + 1);
+  };
+
+  return React.createElement('div', { className: 'app' },
+    React.createElement('h1', null, 'React TypeScript App'),
+    React.createElement('p', null, 'Hello, ', user.name, '!'),
+    React.createElement('p', null, 'You clicked ', count, ' times'),
+    React.createElement('button', { onClick: handleClick }, 'Click me')
   );
-}
+};
 
 ReactDOM.render(
-  <App />,
+  React.createElement(App),
   document.getElementById('root')
 );`,
   },
@@ -437,25 +439,31 @@ createApp(App).mount('#app');`,
     background-color: #36a070;
   }`,
     js: `
-interface AppData {
-  count: number;
-}
+const Vue = window.Vue;
 
 new Vue({
   el: '#app',
-  data(): AppData {
+  data() {
     return {
-      count: 0
+      count: 0,
+      user: {
+        name: 'User',
+        age: 25
+      }
     };
   },
   methods: {
-    increment(): void {
+    increment() {
       this.count++;
+    },
+    greet() {
+      return 'Hello, ' + this.user.name + '!';
     }
   },
   template: \`
     <div class="vue-app">
       <h1>Vue 2 TypeScript App</h1>
+      <p>{{ greet() }}</p>
       <p>You clicked {{ count }} times</p>
       <button @click="increment">Click me</button>
     </div>
@@ -501,37 +509,37 @@ new Vue({
     background-color: #36a070;
   }`,
     js: `
-import { createApp, ref, defineComponent } from 'vue';
+const { createApp, ref } = window.Vue;
 
-interface User {
-  name: string;
-  age: number;
-}
-
-const App = defineComponent({
+const App = {
   setup() {
-    const count = ref<number>(0);
-    const user = ref<User>({ name: 'User', age: 25 });
+    const count = ref(0);
+    const user = ref({ name: 'User', age: 25 });
     
-    const increment = (): void => {
+    const increment = () => {
       count.value++;
+    };
+    
+    const greet = () => {
+      return 'Hello, ' + user.value.name + '!';
     };
     
     return {
       count,
       user,
-      increment
+      increment,
+      greet
     };
   },
   template: \`
     <div class="vue-app">
       <h1>Vue 3 TypeScript App</h1>
-      <p>Hello, {{ user.name }}!</p>
+      <p>{{ greet() }}</p>
       <p>You clicked {{ count }} times</p>
       <button @click="increment">Click me</button>
     </div>
   \`
-});
+};
 
 createApp(App).mount('#app');`,
   },

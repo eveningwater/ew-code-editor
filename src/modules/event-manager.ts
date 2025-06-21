@@ -3,7 +3,7 @@
  */
 import { $, $$ } from "../utils";
 import { runCode, downloadCode, openInNewWindow } from "./preview-manager";
-import { formatEditorsCode, notifyEditorLayoutChange } from "./editor-manager";
+import { formatEditorsCode, notifyEditorLayoutChange, showTypeScriptErrors } from "./editor-manager";
 import { initLayout } from "./layout-manager";
 import {
   closeAllDropdowns,
@@ -47,6 +47,9 @@ export function setupEventListeners() {
 
   // 格式化按钮
   $("#format-btn")?.addEventListener("click", formatEditorsCode);
+
+  // TypeScript错误检查按钮
+  $("#ts-check-btn")?.addEventListener("click", showTypeScriptErrors);
 
   // 下载按钮
   $("#download-btn")?.addEventListener("click", downloadCode);
@@ -110,6 +113,7 @@ export function setupEventListeners() {
       );
       if (framework) {
         updateFrameworkConfig(framework);
+        formatEditorsCode();
       }
       // 关闭下拉菜单
       closeAllDropdowns();

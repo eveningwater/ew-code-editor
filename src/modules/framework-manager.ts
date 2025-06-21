@@ -2,6 +2,7 @@
  * 框架管理模块
  */
 import { defaultTemplates, frameworkCDNs } from "../const";
+import { ewConfirm } from "../plugins/modal";
 import { $, $$, showLoading, hideLoading } from "../utils";
 import { setEditorsContent } from "./editor-manager";
 import { runCode } from "./preview-manager";
@@ -34,6 +35,7 @@ export function getCurrentFramework() {
  */
 export function updateFramework(framework: string) {
   if (framework === currentFramework) return;
+  
   // 切换框架
   currentFramework = framework;
 
@@ -48,8 +50,22 @@ export function updateFramework(framework: string) {
   }
 
   // 更新JavaScript编辑器的语言模式
-  import("./editor-manager").then(({ updateJsEditorLanguage }) => {
-    updateJsEditorLanguage(framework);
+  import("./editor-manager").then(({ updateJsEditorLanguage, showTypeScriptErrors }) => {
+    // 延迟更新语言模式，确保内容已设置
+    setTimeout(() => {
+      if (updateJsEditorLanguage) {
+        updateJsEditorLanguage(framework);
+      }
+      
+      // 如果是TypeScript框架，延迟检查错误
+      if (framework.includes("ts") || framework === "typescript") {
+        setTimeout(() => {
+          if (showTypeScriptErrors) {
+            showTypeScriptErrors();
+          }
+        }, 1000);
+      }
+    }, 200);
   });
 
   // 更新UI
@@ -93,9 +109,18 @@ export function hideDependencyManager() {
 export function addDependency(packageName: string) {
   if (!packageName) return;
 
+  // 确保当前框架的依赖数组存在
+  if (!installedDependencies[currentFramework]) {
+    installedDependencies[currentFramework] = [];
+  }
+
   // 检查依赖是否已存在
-  if (installedDependencies[currentFramework].includes(packageName)) {
-    alert(`Package ${packageName} is already installed.`);
+  if (installedDependencies[currentFramework]!.includes(packageName)) {
+    ewConfirm({
+      title: "提示",
+      content: `Package ${packageName} is already installed.`,
+      sureText: "确定",
+    });
     return;
   }
 
@@ -105,7 +130,7 @@ export function addDependency(packageName: string) {
   // 模拟安装依赖的过程
   setTimeout(() => {
     // 添加到已安装依赖列表
-    installedDependencies[currentFramework].push(packageName);
+    installedDependencies[currentFramework]!.push(packageName);
 
     // 更新依赖列表UI
     updateDependencyList();
@@ -127,10 +152,15 @@ export function addDependency(packageName: string) {
  * @param packageName 包名
  */
 export function removeDependency(packageName: string) {
+  // 确保当前框架的依赖数组存在
+  if (!installedDependencies[currentFramework]) {
+    installedDependencies[currentFramework] = [];
+  }
+
   // 从已安装依赖列表中移除
   installedDependencies[currentFramework] = installedDependencies[
     currentFramework
-  ].filter((pkg) => pkg !== packageName);
+  ]!.filter((pkg) => pkg !== packageName);
 
   // 更新依赖列表UI
   updateDependencyList();
@@ -146,11 +176,16 @@ function updateDependencyList() {
   const dependencyList = $("#dependency-list");
   if (!dependencyList) return;
 
+  // 确保当前框架的依赖数组存在
+  if (!installedDependencies[currentFramework]) {
+    installedDependencies[currentFramework] = [];
+  }
+
   // 清空列表
   dependencyList.innerHTML = "";
 
   // 添加已安装的依赖
-  installedDependencies[currentFramework].forEach((pkg) => {
+  installedDependencies[currentFramework]!.forEach((pkg) => {
     const item = document.createElement("div");
     item.className = "dependency-item";
     item.innerHTML = `
@@ -180,7 +215,12 @@ export function getFrameworkCDNs() {
  * 获取已安装依赖的CDN链接
  */
 export function getDependencyCDNs() {
-  return installedDependencies[currentFramework]
+  // 确保当前框架的依赖数组存在
+  if (!installedDependencies[currentFramework]) {
+    installedDependencies[currentFramework] = [];
+  }
+
+  return installedDependencies[currentFramework]!
     .map((pkg) => {
       // 特殊处理某些需要特定CDN格式的包
       if (pkg.startsWith("antd")) {

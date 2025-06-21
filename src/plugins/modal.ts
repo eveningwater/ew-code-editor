@@ -103,14 +103,26 @@ export default class createPopBox {
               transform: translate(-50%, -50%);
               border-radius: 5px;
               z-index: 2002;
+              background-color: #fff;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             }
             .ew-pop-box-content {
                 word-break: break-all;
                  padding: 20px;
                  font-size: 15px;
                  line-height: 25px;
+                 background-color: #fff;
+                 color: #333;
              }
-            .ew-pop-box-footer {
+             
+             /* 暗色主题适配 */
+             body[data-theme="vs-dark"] .ew-pop-box-content,
+             body[data-theme="hc-black"] .ew-pop-box-content {
+                 background-color: #252526;
+                 color: #eee;
+             }
+             
+             .ew-pop-box-footer {
               padding: 8px 10px;
             }
             .ew-pop-box-footer-btn {
@@ -149,6 +161,13 @@ export default class createPopBox {
               background: #66b1ff;
               border-color: #66b1ff;
               color: #fff;
+            }
+            
+            /* 暗色主题适配 */
+            body[data-theme="vs-dark"] .ew-pop-box-wrapper,
+            body[data-theme="hc-black"] .ew-pop-box-wrapper {
+                background-color: #252526;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             }`;
     const head = <HTMLHeadElement>$("head");
     const existStyleElement = $("#ew-pop-box-style", head);
