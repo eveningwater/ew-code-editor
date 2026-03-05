@@ -62,7 +62,7 @@ EW代码编辑器是一个功能强大的Web在线代码编辑器，专为前端
 1. 克隆项目仓库
 
 ```bash
-git clone https://github.com/yourusername/ew-code-editor.git
+git clone https://github.com/eveningwater/ew-code-editor.git
 cd ew-code-editor
 ```
 
