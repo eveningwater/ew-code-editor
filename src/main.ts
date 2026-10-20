@@ -49,6 +49,12 @@ async function init() {
   } catch (error) {
     logger.error("Initial format error:", error);
   }
+
+  // 通知父窗口编辑器已就绪（握手协议）
+  // SDK（ew-iframe-editor）收到 ready 消息后会发送初始代码
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: "ready" }, "*");
+  }
 }
 
 // 启动应用
