@@ -11,16 +11,29 @@ import {
   defaultJsCode,
 } from "../const";
 import { $, $$, logger } from "../utils";
-import loader from "@monaco-editor/loader";
+import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
+import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
+import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import { runCode } from "./preview-manager";
 import { ewConfirm } from "../plugins/modal";
 
-// 配置 Monaco 编辑器的 CDN 路径
-loader.config({
-  paths: {
-    vs: "https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.52.2/min/vs",
+// 统一使用 npm 打包的 Monaco 单实例（不再从 CDN 加载第二份），
+// 避免双实例下模型与 TS worker 脱节导致的 Could not find source file 报错
+self.MonacoEnvironment = {
+  getWorker(_, label) {
+    if (label === "css" || label === "scss" || label === "less") {
+      return new cssWorker();
+    }
+    if (label === "html" || label === "handlebars" || label === "razor") {
+      return new htmlWorker();
+    }
+    if (label === "typescript" || label === "javascript") {
+      return new tsWorker();
+    }
+    return new editorWorker();
   },
-});
+};
 
 // 编辑器实例
 let htmlEditor: monaco.editor.IStandaloneCodeEditor;
@@ -244,7 +257,7 @@ export async function createEditors(theme: string) {
   // 显示所有编辑器的加载效果
   showLoading("global");
   try {
-    editorInstance = await loader.init();
+    editorInstance = monaco;
     
     // 等待Monaco编辑器完全初始化
     await new Promise(resolve => setTimeout(resolve, 200));
@@ -260,24 +273,33 @@ export async function createEditors(theme: string) {
     
     // 创建HTML编辑器
     htmlEditor = editorInstance.editor.create($("#html-editor")!, {
-      value: defaultHtmlCode,
-      language: "html",
+      model: editorInstance.editor.createModel(
+        defaultHtmlCode,
+        "html",
+        editorInstance.Uri.parse("file:///editor.html")
+      ),
       theme,
       ...baseEditorOptions,
     });
 
     // 创建CSS编辑器
     cssEditor = editorInstance.editor.create($("#css-editor")!, {
-      value: defaultCssCode,
-      language: "css",
+      model: editorInstance.editor.createModel(
+        defaultCssCode,
+        "css",
+        editorInstance.Uri.parse("file:///editor.css")
+      ),
       theme,
       ...baseEditorOptions,
     });
 
     // 创建JavaScript编辑器
     jsEditor = editorInstance.editor.create($("#js-editor")!, {
-      value: defaultJsCode,
-      language: "javascript",
+      model: editorInstance.editor.createModel(
+        defaultJsCode,
+        "javascript",
+        editorInstance.Uri.parse("file:///editor.js")
+      ),
       theme,
       ...baseEditorOptions,
     });
@@ -552,86 +574,46 @@ export function updateJsEditorLanguage(framework: string) {
       
       try {
         const model = jsEditor.getModel();
-        if (model) {
-          // 检查模型是否有效
-          if (model.getLanguageId() !== language) {
-            // 获取当前代码内容
-            const currentValue = jsEditor.getValue();
-            
-            // 先销毁旧模型，确保工作器清理
-            model.dispose();
-            
-            // 等待一小段时间让工作器清理完成
-            setTimeout(() => {
-              try {
-                // 创建新模型
-                const newModel = editorInstance?.editor.createModel(currentValue, language);
-                if (newModel) {
-                  jsEditor.setModel(newModel);
-                  
-                  // 延迟更新编译器选项，确保模型已完全加载
-                  setTimeout(() => {
-                    try {
-                      if (isTypeScript && editorInstance) {
-                        const options = { ...tsCompilerOptions };
-                        if (isReact) {
-                          options.jsx = monaco.languages.typescript.JsxEmit.React;
-                        }
-                        
-                        // 重新配置TypeScript选项
-                        editorInstance.languages.typescript.typescriptDefaults.setCompilerOptions({
-                          ...options,
-                          strict: false,
-                          noImplicitAny: false,
-                          noImplicitReturns: false,
-                          noImplicitThis: false,
-                          noUncheckedIndexedAccess: false,
-                          exactOptionalPropertyTypes: false,
-                        });
-                        editorInstance.languages.typescript.javascriptDefaults.setCompilerOptions({
-                          ...options,
-                          strict: false,
-                          noImplicitAny: false,
-                          noImplicitReturns: false,
-                          noImplicitThis: false,
-                          noUncheckedIndexedAccess: false,
-                          exactOptionalPropertyTypes: false,
-                        });
-                        
-                        logger.success(`TypeScript model created successfully for ${framework}`);
-                      }
-                    } catch (configError) {
-                      logger.warning('Error updating TypeScript config:', configError);
-                    }
-                  }, 200);
-                }
-              } catch (createError) {
-                logger.error('Error creating new model:', createError);
-                // 如果创建失败，尝试使用原始方法
-                try {
-                  const fallbackModel = editorInstance?.editor.createModel(currentValue, language);
-                  if (fallbackModel) {
-                    jsEditor.setModel(fallbackModel);
-                  }
-                } catch (fallbackError) {
-                  logger.error('Fallback model creation failed:', fallbackError);
-                }
+        if (model && model.getLanguageId() !== language) {
+          // 原地切换语言模式，避免销毁/重建模型导致
+          // TS worker 引用已销毁的模型（Could not find source file）
+          editorInstance?.editor.setModelLanguage(model, language);
+
+          // 更新编译器选项
+          if (isTypeScript && editorInstance) {
+            try {
+              const options = { ...tsCompilerOptions };
+              if (isReact) {
+                options.jsx = monaco.languages.typescript.JsxEmit.React;
               }
-            }, 50);
+
+              editorInstance.languages.typescript.typescriptDefaults.setCompilerOptions({
+                ...options,
+                strict: false,
+                noImplicitAny: false,
+                noImplicitReturns: false,
+                noImplicitThis: false,
+                noUncheckedIndexedAccess: false,
+                exactOptionalPropertyTypes: false,
+              });
+              editorInstance.languages.typescript.javascriptDefaults.setCompilerOptions({
+                ...options,
+                strict: false,
+                noImplicitAny: false,
+                noImplicitReturns: false,
+                noImplicitThis: false,
+                noUncheckedIndexedAccess: false,
+                exactOptionalPropertyTypes: false,
+              });
+
+              logger.success(`TypeScript language switched successfully for ${framework}`);
+            } catch (configError) {
+              logger.warning('Error updating TypeScript config:', configError);
+            }
           }
         }
       } catch (modelError) {
         logger.warning('Error updating model language:', modelError);
-        // 如果模型更新失败，尝试重新创建模型
-        try {
-          const currentValue = jsEditor.getValue();
-          const newModel = editorInstance?.editor.createModel(currentValue, language);
-          if (newModel) {
-            jsEditor.setModel(newModel);
-          }
-        } catch (recreateError) {
-          logger.error('Error recreating model:', recreateError);
-        }
       }
     }
 

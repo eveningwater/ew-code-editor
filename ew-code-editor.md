@@ -71,7 +71,7 @@ export async function formatEditorsCode() {
 
 ### 2. 代码预览实现
 
-代码预览通过iframe实现，将三种语言的代码合并成一个完整的HTML文档，然后设置到iframe的srcdoc属性中：
+代码预览通过iframe实现，将三种语言的代码合并成一个完整的HTML文档，然后通过 blob URL 加载（srcdoc 文档中 import map 不生效，无法支持依赖的 ESM 导入）：
 
 ```typescript
 export function runCode() {
@@ -80,9 +80,14 @@ export function runCode() {
   const combinedCode = generateCombinedCode(html, css, js);
   const iframe = $("#preview-frame");
 
-  // 解决不释放iframe内容，导致报错Identifier 'xxx' has already been declared
-  iframe.srcdoc = "about:blank"; // 重置 iframe 内容
-  iframe.srcdoc = combinedCode;
+  // 释放上一次预览的 blob URL，避免内存泄漏
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+  }
+  previewUrl = URL.createObjectURL(
+    new Blob([combinedCode], { type: "text/html;charset=utf-8" })
+  );
+  iframe.src = previewUrl;
 }
 ```
 
@@ -210,32 +215,40 @@ export function addDependency(packageName: string) {
 }
 ```
 
-添加的依赖会通过CDN方式加载，支持指定版本号：
+添加的依赖通过 **esm.sh + import map** 方式加载（ESM 模式），支持指定版本号，依赖列表会持久化到 localStorage：
 
 ```typescript
-export function getDependencyCDNs() {
-  return installedDependencies[currentFramework]
-    .map((pkg) => {
-      // 特殊处理某些需要特定CDN格式的包
-      if (pkg.startsWith("antd")) {
-        // 对于antd，使用UMD版本
-        const [name, version] = pkg.split("@");
-        const ver = version || "latest";
-        return [
-          `https://unpkg.com/${name}@${ver}/dist/antd.min.js`,
-          `https://unpkg.com/${name}@${ver}/dist/antd.min.css`,
-        ];
-      }
+export function getDependencyImportMap(): Record<string, string> {
+  const importMap: Record<string, string> = {};
 
-      // 默认处理方式
-      const [name, version] = pkg.split("@");
-      return version
-        ? `https://unpkg.com/${name}@${version}`
-        : `https://unpkg.com/${name}`;
-    })
-    .flat(); // 使用flat()将嵌套数组展平
+  // vue3 模板使用 import 语法，需要框架自身的 ESM 映射
+  if (currentFramework === "vue3" || currentFramework === "vue3-ts") {
+    importMap["vue"] = "https://esm.sh/vue@3.3.4";
+  }
+
+  const deps = installedDependencies[currentFramework] || [];
+  deps.forEach((pkg) => {
+    // antd 等 UMD 包走 script 标签，不进 import map
+    if (pkg.startsWith("antd")) return;
+    const [name, version] = parsePackageName(pkg);
+    importMap[name] = version
+      ? `https://esm.sh/${name}@${version}`
+      : `https://esm.sh/${name}`;
+  });
+
+  return importMap;
 }
 ```
+
+`generateCombinedCode` 会在 `<head>` 最前面注入 `<script type="importmap">`（必须先于任何模块脚本），用户代码即可直接 `import { debounce } from 'lodash-es'`：
+
+```html
+<script type="importmap">
+{ "imports": { "lodash-es": "https://esm.sh/lodash-es@4.17.21" } }
+</script>
+```
+
+当存在 ESM 依赖或代码含 `import/export` 语法时，用户脚本自动以 `<script type="module">` 运行；TypeScript 框架则由 iframe 内的 ts 编译器转译为 ESM 后，动态创建模块脚本执行（替代原先的 eval 方案），使 TS 代码同样支持 npm 包导入。包名解析使用 `lastIndexOf("@")`，兼容 `@scope/pkg@1.0.0` 这类 scoped 包。antd 等特殊包仍保留 UMD script/link 标签注入（`getDependencyCDNs`）。
 
 ### 6. 多语言支持实现
 

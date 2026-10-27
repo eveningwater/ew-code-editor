@@ -50,6 +50,7 @@ export function updateUILanguage(language: string) {
   $("#install-btn")!.textContent = t.install || '';
   $("#close-dependency-btn")!.textContent = t.close || '';
   $("#add-dependency-btn")!.textContent = t.dependencies || '';
+  ($("#dependency-input") as HTMLInputElement)!.placeholder = t.dependencyPlaceholder || '';
 }
 
 /**

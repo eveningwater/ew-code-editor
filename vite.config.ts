@@ -20,8 +20,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    // 预构建这些依赖
-    include: ["monaco-editor"],
+    // monaco 的 ?worker 深导入与依赖预构建不兼容，需排除
+    exclude: ["monaco-editor"],
   },
   server: {
     // 确保开发服务器正确处理worker文件的MIME类型

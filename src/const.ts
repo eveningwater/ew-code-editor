@@ -27,6 +27,7 @@ export const translations: Record<string, Record<string, string>> = {
     dependencies: "Dependencies",
     install: "Install",
     close: "Close",
+    dependencyPlaceholder: "Package name (e.g. lodash-es@4.17.21)",
   },
   zh: {
     run: "运行",
@@ -54,6 +55,7 @@ export const translations: Record<string, Record<string, string>> = {
     dependencies: "依赖管理",
     install: "安装",
     close: "关闭",
+    dependencyPlaceholder: "包名@版本 (如 lodash-es@4.17.21)",
   },
 };
 

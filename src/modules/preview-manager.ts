@@ -2,6 +2,9 @@ import { generateCombinedCode, openNewWindow, $ } from "../utils";
 import { getEditorsCode } from "./editor-manager";
 import { getCurrentFramework } from "./framework-manager";
 
+// 预览页的 blob URL，用于运行后及时释放
+let previewUrl: string | null = null;
+
 /**
  * 运行代码
  */
@@ -11,9 +14,15 @@ export function runCode() {
   const combinedCode = generateCombinedCode(html, css, js);
   const iframe = $<HTMLIFrameElement>("#preview-frame")!;
 
-  // 解决不释放iframe内容，导致报错Identifier 'xxx' has already been declared
-  iframe.srcdoc = "about:blank"; // 重置 iframe 内容
-  iframe.srcdoc = combinedCode;
+  // srcdoc 文档中 import map 不生效（Chromium 限制），
+  // 改用 blob URL 加载预览，使依赖的 ESM 导入可正常解析
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+  }
+  previewUrl = URL.createObjectURL(
+    new Blob([combinedCode], { type: "text/html;charset=utf-8" })
+  );
+  iframe.src = previewUrl;
 }
 
 /**

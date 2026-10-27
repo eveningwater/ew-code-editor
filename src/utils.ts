@@ -1,8 +1,18 @@
 import {
   getFrameworkCDNs,
   getDependencyCDNs,
+  getDependencyImportMap,
   getCurrentFramework,
 } from "./modules/framework-manager";
+
+/**
+ * 检测代码是否包含 ES 模块语法（静态 import/export）
+ * 注意排除动态 import() 和 import.meta
+ */
+const hasModuleSyntax = (code: string) =>
+  /^\s*(import\s+[\w*{]|import\s+['"]|export\s+[\w*{]|export\s+default)/m.test(
+    code
+  );
 
 export const generateCombinedCode = (html: string, css: string, js: string) => {
   // 解析HTML以找到插入点
@@ -23,6 +33,20 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
 
   // 获取当前框架
   const currentFramework = getCurrentFramework();
+
+  // 注入依赖的 import map，必须位于所有模块脚本加载之前
+  const dependencyImportMap = getDependencyImportMap();
+  const hasEsmDependencies = Object.keys(dependencyImportMap).length > 0;
+  if (hasEsmDependencies) {
+    const importMapScript = doc.createElement("script");
+    importMapScript.type = "importmap";
+    importMapScript.textContent = JSON.stringify(
+      { imports: dependencyImportMap },
+      null,
+      2
+    );
+    doc.head.appendChild(importMapScript);
+  }
 
   // 添加框架CDN
   const frameworkCDNs = getFrameworkCDNs();
@@ -157,14 +181,22 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
       } else if (currentFramework === "vue-ts" || currentFramework === "vue3-ts") {
         // 对于Vue TypeScript，直接使用原始代码，让Vue处理
         scriptElement.textContent = originalCode;
+        // 有 ESM 依赖或模块语法时以模块方式运行，import 才能经 import map 解析
+        if (hasEsmDependencies || hasModuleSyntax(originalCode)) {
+          scriptElement.type = "module";
+        }
       } else {
-        // 对于其他TypeScript框架，使用TypeScript编译器
+        // 对于其他TypeScript框架，转译为 ESM 后以模块脚本执行，
+        // 这样代码中的 import 可以被 import map 正确解析
         const wrappedCode = `
           // 编译并执行TypeScript代码
           (function() {
             try {
               var tsResult = ts.transpileModule(${JSON.stringify(originalCode)}, tsConfig);
-              eval(tsResult.outputText);
+              var moduleScript = document.createElement("script");
+              moduleScript.type = "module";
+              moduleScript.textContent = tsResult.outputText;
+              document.body.appendChild(moduleScript);
             } catch (error) {
               console.error('TypeScript编译错误:', error);
             }
@@ -175,6 +207,10 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     } else {
       // 非TypeScript框架，直接使用原始代码
       scriptElement.textContent = js;
+      // 有 ESM 依赖或模块语法时以模块方式运行，import 才能经 import map 解析
+      if (hasEsmDependencies || hasModuleSyntax(js)) {
+        scriptElement.type = "module";
+      }
     }
 
     doc.body.appendChild(scriptElement);

@@ -10,8 +10,11 @@ import { runCode } from "./preview-manager";
 // 当前选择的框架
 let currentFramework = "vanilla";
 
-// 已安装的依赖
-let installedDependencies: Record<string, string[]> = {
+// 依赖持久化存储键
+const DEPENDENCY_STORAGE_KEY = "editor-dependencies";
+
+// 默认依赖结构
+const defaultDependencies: Record<string, string[]> = {
   vanilla: [],
   typescript: [],
   react: [],
@@ -21,6 +24,45 @@ let installedDependencies: Record<string, string[]> = {
   "vue-ts": [],
   "vue3-ts": [],
 };
+
+/**
+ * 从 localStorage 加载已安装依赖
+ */
+function loadDependencies(): Record<string, string[]> {
+  try {
+    const stored = localStorage.getItem(DEPENDENCY_STORAGE_KEY);
+    if (stored) {
+      return { ...defaultDependencies, ...JSON.parse(stored) };
+    }
+  } catch {
+    // 解析失败时使用默认值
+  }
+  return { ...defaultDependencies };
+}
+
+// 已安装的依赖
+let installedDependencies: Record<string, string[]> = loadDependencies();
+
+/**
+ * 持久化依赖到 localStorage
+ */
+function persistDependencies() {
+  localStorage.setItem(
+    DEPENDENCY_STORAGE_KEY,
+    JSON.stringify(installedDependencies)
+  );
+}
+
+/**
+ * 解析包名和版本号，兼容 scoped 包（如 @scope/pkg@1.0.0）
+ */
+export function parsePackageName(pkg: string): [string, string] {
+  const atIndex = pkg.lastIndexOf("@");
+  if (atIndex > 0) {
+    return [pkg.slice(0, atIndex), pkg.slice(atIndex + 1)];
+  }
+  return [pkg, ""];
+}
 
 /**
  * 获取当前框架
@@ -131,6 +173,7 @@ export function addDependency(packageName: string) {
   setTimeout(() => {
     // 添加到已安装依赖列表
     installedDependencies[currentFramework]!.push(packageName);
+    persistDependencies();
 
     // 更新依赖列表UI
     updateDependencyList();
@@ -161,6 +204,7 @@ export function removeDependency(packageName: string) {
   installedDependencies[currentFramework] = installedDependencies[
     currentFramework
   ]!.filter((pkg) => pkg !== packageName);
+  persistDependencies();
 
   // 更新依赖列表UI
   updateDependencyList();
@@ -212,7 +256,7 @@ export function getFrameworkCDNs() {
 }
 
 /**
- * 获取已安装依赖的CDN链接
+ * 获取已安装依赖的CDN链接（仅处理需要UMD全局构建的特殊包，如antd）
  */
 export function getDependencyCDNs() {
   // 确保当前框架的依赖数组存在
@@ -221,25 +265,42 @@ export function getDependencyCDNs() {
   }
 
   return installedDependencies[currentFramework]!
+    .filter((pkg) => pkg.startsWith("antd"))
     .map((pkg) => {
-      // 特殊处理某些需要特定CDN格式的包
-      if (pkg.startsWith("antd")) {
-        // 对于antd，使用UMD版本
-        const [name, version] = pkg.split("@");
-        const ver = version || "latest";
-        return [
-          `https://unpkg.com/${name}@${ver}/dist/antd.min.js`,
-          `https://unpkg.com/${name}@${ver}/dist/antd.min.css`,
-        ];
-      }
-
-      // 默认处理方式
-      const [name, version] = pkg.split("@");
-      return version
-        ? `https://unpkg.com/${name}@${version}`
-        : `https://unpkg.com/${name}`;
+      // antd 使用 UMD 版本 + 样式文件
+      const [name, version] = parsePackageName(pkg);
+      const ver = version || "latest";
+      return [
+        `https://unpkg.com/${name}@${ver}/dist/antd.min.js`,
+        `https://unpkg.com/${name}@${ver}/dist/antd.min.css`,
+      ];
     })
     .flat(); // 使用flat()将嵌套数组展平
+}
+
+/**
+ * 获取已安装依赖的 import map 映射（esm.sh ESM CDN）
+ * 配合 <script type="importmap"> 使用户代码可直接 import npm 包
+ */
+export function getDependencyImportMap(): Record<string, string> {
+  const importMap: Record<string, string> = {};
+
+  // vue3 模板使用 import 语法，需要框架自身的 ESM 映射
+  if (currentFramework === "vue3" || currentFramework === "vue3-ts") {
+    importMap["vue"] = "https://esm.sh/vue@3.3.4";
+  }
+
+  const deps = installedDependencies[currentFramework] || [];
+  deps.forEach((pkg) => {
+    // antd 等 UMD 包走 script 标签，不进 import map
+    if (pkg.startsWith("antd")) return;
+    const [name, version] = parsePackageName(pkg);
+    importMap[name] = version
+      ? `https://esm.sh/${name}@${version}`
+      : `https://esm.sh/${name}`;
+  });
+
+  return importMap;
 }
 
 /**

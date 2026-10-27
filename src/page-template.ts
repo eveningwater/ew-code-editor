@@ -79,7 +79,7 @@ export const pageTemplate = ` <div class="container">
             <button id="close-dependency-btn" class="btn">Close</button>
           </div>
           <div class="dependency-content">
-            <input type="text" id="dependency-input" placeholder="Package name (e.g. react@18.2.0)" />
+            <input type="text" id="dependency-input" placeholder="Package name (e.g. lodash-es@4.17.21)" />
             <div id="dependency-list"></div>
           </div>
           <div id="dependency-loading" class="loading-overlay">

@@ -15,7 +15,6 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
-    "@monaco-editor/loader": "^1.5.0",
     "@types/node": "^22.13.14",
     "@types/prettier": "^3.0.0",
     "gh-pages": "^6.3.0",
