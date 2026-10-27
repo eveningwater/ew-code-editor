@@ -271,8 +271,8 @@ export function getDependencyCDNs() {
       const [name, version] = parsePackageName(pkg);
       const ver = version || "latest";
       return [
-        `https://unpkg.com/${name}@${ver}/dist/antd.min.js`,
-        `https://unpkg.com/${name}@${ver}/dist/antd.min.css`,
+        `https://cdn.jsdelivr.net/npm/${name}@${ver}/dist/antd.min.js`,
+        `https://cdn.jsdelivr.net/npm/${name}@${ver}/dist/antd.min.css`,
       ];
     })
     .flat(); // 使用flat()将嵌套数组展平

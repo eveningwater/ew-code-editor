@@ -206,24 +206,20 @@ document.getElementById('demo-btn')?.addEventListener('click', function() {
     js: `// React component
 const React = window.React;
 const ReactDOM = window.ReactDOM;
-function App() {
+
+const App = () => {
   const [count, setCount] = React.useState(0);
 
-  return (
-    <div className="app">
-      <h1>React App</h1>
-      <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>
-        Click me
-      </button>
-    </div>
+  return React.createElement('div', { className: 'app' },
+    React.createElement('h1', null, 'React App'),
+    React.createElement('p', null, 'You clicked ', count, ' times'),
+    React.createElement('button', { onClick: () => setCount(count + 1) }, 'Click me')
   );
-}
+};
 
-// Render the App component to the DOM
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
+// React 18 createRoot API
+ReactDOM.createRoot(document.getElementById('root')).render(
+  React.createElement(App)
 );`,
   },
   "react-ts": {
@@ -271,7 +267,7 @@ const { useState } = React;
 
 const App = () => {
   const [count, setCount] = useState(0);
-  const [user, setUser] = useState({ name: 'User', age: 25 });
+  const [user] = useState({ name: 'User', age: 25 });
 
   const handleClick = () => {
     setCount(count + 1);
@@ -285,9 +281,9 @@ const App = () => {
   );
 };
 
-ReactDOM.render(
-  React.createElement(App),
-  document.getElementById('root')
+// React 18 createRoot API
+ReactDOM.createRoot(document.getElementById('root')).render(
+  React.createElement(App)
 );`,
   },
   vue: {
@@ -555,27 +551,25 @@ export const defaultJsCode = defaultTemplates.vanilla.js;
 // 框架CDN链接
 export const frameworkCDNs = {
   react: [
-    "https://unpkg.com/react@18/umd/react.development.js",
-    "https://unpkg.com/react-dom@18/umd/react-dom.development.js",
-    "https://unpkg.com/@babel/standalone/babel.min.js",
+    "https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js",
+    "https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js",
   ],
   "react-ts": [
-    "https://unpkg.com/react@18/umd/react.development.js",
-    "https://unpkg.com/react-dom@18/umd/react-dom.development.js",
-    "https://unpkg.com/@babel/standalone/babel.min.js",
-    "https://unpkg.com/typescript@latest/lib/typescript.js",
+    "https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js",
+    "https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js",
+    "https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.js",
   ],
-  vue: ["https://unpkg.com/vue@2.6.14/dist/vue.js"],
-  vue3: ["https://unpkg.com/vue@3.3.4/dist/vue.global.js"],
+  vue: ["https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"],
+  vue3: ["https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.js"],
   "vue-ts": [
-    "https://unpkg.com/vue@2.6.14/dist/vue.js",
-    "https://unpkg.com/typescript@latest/lib/typescript.js",
+    "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js",
+    "https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.js",
   ],
   "vue3-ts": [
-    "https://unpkg.com/vue@3.3.4/dist/vue.global.js",
-    "https://unpkg.com/typescript@latest/lib/typescript.js",
+    "https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.js",
+    "https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.js",
   ],
-  typescript: ["https://unpkg.com/typescript@latest/lib/typescript.js"],
+  typescript: ["https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.js"],
   vanilla: [],
 };
 

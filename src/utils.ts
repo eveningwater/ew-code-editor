@@ -80,47 +80,9 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
     doc.head.appendChild(styleElement);
   }
 
-  // 为React和其他需要ES模块系统的库添加模块映射
-  if (currentFramework.includes("react") || currentFramework.includes("vue")) {
-    const moduleMapScript = doc.createElement("script");
-    moduleMapScript.textContent = `
-      // 创建模块映射系统
-      window.__moduleMap = {
-        'react': window.React,
-        'react-dom': window.ReactDOM,
-        'vue': window.Vue,
-        'vue3': window.Vue
-      };
-      
-      // 模拟ES模块的import
-      window.__importModule = function(moduleName) {
-        const module = window.__moduleMap[moduleName];
-        if (module) {
-          return Promise.resolve(module);
-        } else {
-          console.warn('Module not found:', moduleName);
-          return Promise.resolve({});
-        }
-      };
-      
-      // 模拟动态import
-      window.import = function(moduleName) {
-        return window.__importModule(moduleName);
-      };
-    `;
-    doc.head.appendChild(moduleMapScript);
-  }
-
   // 添加JavaScript
   if (js.trim()) {
     const scriptElement = doc.createElement("script");
-
-    // 对于React，需要使用Babel转换JSX
-    if (currentFramework.includes("react")) {
-      scriptElement.type = "text/babel";
-      scriptElement.setAttribute("data-presets", "react");
-      scriptElement.setAttribute("data-type", "module");
-    }
 
     // 对于TypeScript相关框架，添加类型声明和编译配置
     if (currentFramework.includes("ts") || currentFramework === "typescript") {
@@ -157,28 +119,7 @@ export const generateCombinedCode = (html: string, css: string, js: string) => {
 
       // 包装TypeScript代码，使其在运行前先编译
       const originalCode = js;
-      if (currentFramework === "react-ts") {
-        // 对于React TypeScript，使用Babel处理JSX，同时处理TypeScript
-        scriptElement.type = "text/babel";
-        scriptElement.setAttribute("data-type", "module");
-        scriptElement.setAttribute("data-presets", "typescript,react");
-
-        // 添加React类型声明的内联脚本
-        const reactTypesScript = doc.createElement("script");
-        reactTypesScript.textContent = `
-          // 内联React类型声明
-          if (typeof React !== 'undefined') {
-            window.React = React;
-          }
-          if (typeof ReactDOM !== 'undefined') {
-            window.ReactDOM = ReactDOM;
-          }
-        `;
-        doc.head.appendChild(reactTypesScript);
-
-        // 设置scriptElement的内容
-        scriptElement.textContent = originalCode;
-      } else if (currentFramework === "vue-ts" || currentFramework === "vue3-ts") {
+      if (currentFramework === "vue-ts" || currentFramework === "vue3-ts") {
         // 对于Vue TypeScript，直接使用原始代码，让Vue处理
         scriptElement.textContent = originalCode;
         // 有 ESM 依赖或模块语法时以模块方式运行，import 才能经 import map 解析
